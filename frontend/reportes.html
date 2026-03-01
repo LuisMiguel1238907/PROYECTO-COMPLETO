@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reportes - Sistema de Préstamos</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100">
+  <div class="flex">
+    <!-- Sidebar -->
+    <aside class="w-64 h-screen bg-gray-900 text-white p-6">
+      <h2 class="text-xl font-bold text-blue-400 mb-6">📊 Reportes</h2>
+
+      <nav class="space-y-2">
+        <a href="index3.html" class="block p-2 hover:bg-gray-700 rounded">🏠 Dashboard</a>
+        <a href="clientes.html" class="block p-2 hover:bg-gray-700 rounded">👥 Clientes</a>
+        <a href="prestamos.html" class="block p-2 hover:bg-gray-700 rounded">💳 Préstamos</a>
+        <a href="pagos.html" class="block p-2 hover:bg-gray-700 rounded">💵 Pagos</a>
+        <a href="#" class="block p-2 bg-gray-700 rounded font-semibold">📊 Reportes</a>
+        <a href="configuracion.html" class="block p-2 hover:bg-gray-700 rounded">⚙️ Configuración</a>
+      </nav>
+    </aside>
+
+    <!-- CONTENIDO -->
+    <main class="flex-1 p-10">
+
+      <h1 class="text-3xl font-bold text-gray-800 mb-6">Generador de Reportes</h1>
+      <p class="text-gray-600 mb-10">Descarga información detallada de clientes, préstamos y pagos 🔽</p>
+
+      <!-- CARDS DE DESCARGA -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+        <!-- CLIENTES -->
+        <div class="bg-white p-6 rounded shadow border-l-4 border-blue-500">
+          <h2 class="text-lg font-bold text-gray-700 mb-2">📋 Clientes</h2>
+          <button onclick="descargar('clientes','excel')" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded mt-2">📥 Descargar Excel</button>
+          <button onclick="descargar('clientes','pdf')" class="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded mt-2">📥 Descargar PDF</button>
+        </div>
+
+        <!-- PRESTAMOS -->
+        <div class="bg-white p-6 rounded shadow border-l-4 border-green-500">
+          <h2 class="text-lg font-bold text-gray-700 mb-2">💳 Préstamos</h2>
+          <button onclick="descargar('prestamos','excel')" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded mt-2">📥 Descargar Excel</button>
+          <button onclick="descargar('prestamos','pdf')" class="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded mt-2">📥 Descargar PDF</button>
+        </div>
+
+        <!-- PAGOS -->
+        <div class="bg-white p-6 rounded shadow border-l-4 border-yellow-500">
+          <h2 class="text-lg font-bold text-gray-700 mb-2">💵 Pagos</h2>
+          <button onclick="descargar('pagos','excel')" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded mt-2">📥 Descargar Excel</button>
+          <button onclick="descargar('pagos','pdf')" class="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded mt-2">📥 Descargar PDF</button>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+
+<script>
+
+// ✅ Verificar sesión
+const token = localStorage.getItem("token");
+if (!token) window.location.href = "index2.html";
+
+const API = "http://127.0.0.1:8000";
+
+// ✅ Descargar archivos reales
+async function descargar(tipo, formato) {
+    let endpoint = "";
+
+    if (tipo === "clientes" && formato === "excel") endpoint = "/reportes/clientes/excel";
+    if (tipo === "clientes" && formato === "pdf")   endpoint = "/reportes/clientes/pdf";
+
+    if (tipo === "prestamos" && formato === "excel") endpoint = "/reportes/prestamos/excel";
+    if (tipo === "prestamos" && formato === "pdf")   endpoint = "/reportes/prestamos/pdf";
+
+    if (tipo === "pagos" && formato === "excel") endpoint = "/reportes/pagos/excel";
+    if (tipo === "pagos" && formato === "pdf")   endpoint = "/reportes/pagos/pdf";
+
+    try {
+        const res = await fetch(API + endpoint, {
+            method: "GET",
+            headers: { "Authorization": "Bearer " + token }
+        });
+
+        if (!res.ok) {
+            alert("❌ Error descargando reporte");
+            return;
+        }
+
+        // ✅ Convertir la respuesta en un archivo descargable
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `${tipo}_reporte.${formato}`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+
+    } catch (e) {
+        alert("❌ Error conectando con servidor");
+        console.log(e);
+    }
+}
+
+</script>
+
+</body>
+</html>

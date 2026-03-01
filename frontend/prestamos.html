@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Préstamos - Sistema</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100">
+
+    <div class="flex">
+        <!-- ✅ Sidebar -->
+        <aside class="w-64 h-screen bg-gray-900 text-white p-6">
+            <h2 class="text-xl font-bold text-blue-400 mb-6">💰 Préstamos</h2>
+
+            <nav class="space-y-2">
+                <a href="index3.html" class="block p-2 hover:bg-gray-700 rounded">🏠 Dashboard</a>
+                <a href="clientes.html" class="block p-2 hover:bg-gray-700 rounded">👥 Clientes</a>
+                <a href="#" class="block p-2 bg-gray-700 rounded font-semibold">💳 Préstamos</a>
+                <a href="pagos.html" class="block p-2 hover:bg-gray-700 rounded">💵 Pagos</a>
+                <a href="reportes.html" class="block p-2 hover:bg-gray-700 rounded">📊 Reportes</a>
+                <a href="configuracion.html" class="block p-2 hover:bg-gray-700 rounded">⚙️ Configuración</a>
+            </nav>
+        </aside>
+
+        <!-- ✅ CONTENIDO -->
+        <main class="flex-1 p-10">
+
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-2xl font-bold text-gray-800">Préstamos Registrados</h1>
+                <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded" onclick="toggleModal(true)">+ Nuevo Préstamo</button>
+            </div>
+
+            <!-- ✅ RESUMEN -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+                <div class="bg-white p-4 rounded shadow">
+                    <h2 class="text-sm text-gray-600">Total Prestado</h2>
+                    <p id="totalPrestado" class="text-2xl font-bold text-blue-600">$0</p>
+                </div>
+
+                <div class="bg-white p-4 rounded shadow">
+                    <h2 class="text-sm text-gray-600">Activos</h2>
+                    <p id="prestamosActivos" class="text-2xl font-bold text-green-500">0</p>
+                </div>
+
+                <div class="bg-white p-4 rounded shadow">
+                    <h2 class="text-sm text-gray-600">Pagados</h2>
+                    <p id="prestamosPagados" class="text-2xl font-bold text-gray-700">0</p>
+                </div>
+
+                <div class="bg-white p-4 rounded shadow">
+                    <h2 class="text-sm text-gray-600">Atrasados</h2>
+                    <p id="prestamosVencidos" class="text-2xl font-bold text-red-500">0</p>
+                </div>
+            </div>
+
+            <!-- ✅ TABLA -->
+            <div class="bg-white rounded shadow overflow-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-200">
+                        <tr>
+                            <th class="p-2 text-left">Cliente</th>
+                            <th class="p-2 text-left">Monto</th>
+                            <th class="p-2 text-left">Fecha Inicio</th>
+                            <th class="p-2 text-left">Fecha Límite</th>
+                            <th class="p-2 text-left">Estado</th>
+                            <th class="p-2 text-left">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaPrestamos"></tbody>
+                </table>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- ✅ MODAL -->
+    <div id="modal" class="fixed hidden inset-0 bg-black/60 flex items-center justify-center">
+        <div class="bg-white p-6 rounded shadow w-96 relative">
+            
+            <button class="absolute top-2 right-3 text-gray-600 text-xl" onclick="toggleModal(false)">×</button>
+
+            <h2 class="text-xl font-bold mb-4">Nuevo Préstamo</h2>
+
+            <form id="formPrestamo">
+                <label class="block mb-2">Cliente:</label>
+                <select id="clienteSelect" class="w-full p-2 border rounded mb-3"></select>
+
+                <label class="block mb-2">Monto:</label>
+                <input type="number" id="monto" class="w-full p-2 border rounded mb-3">
+
+                <label class="block mb-2">Interés (%):</label>
+                <input type="number" id="interes" class="w-full p-2 border rounded mb-3">
+
+                <label class="block mb-2">Fecha inicio:</label>
+                <input type="date" id="inicio" class="w-full p-2 border rounded mb-3">
+
+                <label class="block mb-2">Fecha límite:</label>
+                <input type="date" id="limite" class="w-full p-2 border rounded mb-4">
+
+                <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded w-full">Guardar</button>
+            </form>
+
+        </div>
+    </div>
+
+<script>
+
+const API = "http://127.0.0.1:8000";
+const token = localStorage.getItem("token");
+
+// ✅ Si no hay token → redirige a login
+if (!token) window.location.href = "index2.html";
+
+document.addEventListener("DOMContentLoaded", () => {
+    cargarClientes();
+    cargarPrestamos();
+});
+
+// ✅ Mostrar/Ocultar modal
+function toggleModal(show) {
+    document.getElementById("modal").classList.toggle("hidden", !show);
+}
+
+// ✅ Cargar clientes reales
+async function cargarClientes() {
+    const res = await fetch(`${API}/clientes`, {
+        headers: { "Authorization": "Bearer " + token }
+    });
+
+    const data = await res.json();
+    const select = document.getElementById("clienteSelect");
+
+    select.innerHTML = '<option value="">Seleccione</option>';
+
+    data.forEach(c => {
+        const op = document.createElement("option");
+        op.value = c.id;
+        op.textContent = c.nombre;
+        select.appendChild(op);
+    });
+}
+
+// ✅ Cargar préstamos reales
+async function cargarPrestamos() {
+    const res = await fetch(`${API}/prestamos`, {
+        headers: { "Authorization": "Bearer " + token }
+    });
+
+    const prestamos = await res.json();
+    const tbody = document.getElementById("tablaPrestamos");
+
+    tbody.innerHTML = "";
+    let totalPrestado = 0;
+    let activos = 0;
+    let pagados = 0;
+    let atrasados = 0;
+
+    prestamos.forEach(p => {
+        totalPrestado += p.monto_inicial + p.total_interes;
+
+        if (p.estado === "Activo") activos++;
+        if (p.estado === "Pagado") pagados++;
+        if (p.estado === "Atrasado") atrasados++;
+
+        const fila = `
+            <tr class="border-b">
+                <td class="p-2">${p.cliente ? p.cliente.nombre : "Sin cliente"}</td>
+                <td class="p-2">$${(p.monto_inicial + p.total_interes).toLocaleString()}</td>
+                <td class="p-2">${p.fecha_inicio}</td>
+                <td class="p-2">${p.fecha_limite}</td>
+                <td class="p-2 font-bold">${p.estado}</td>
+                <td class="p-2">
+                    <button onclick="eliminarPrestamo(${p.id})" class="text-red-600 hover:underline">Eliminar</button>
+                </td>
+            </tr>`;
+        tbody.innerHTML += fila;
+    });
+
+    document.getElementById("totalPrestado").textContent = "$" + totalPrestado.toLocaleString();
+    document.getElementById("prestamosActivos").textContent = activos;
+    document.getElementById("prestamosPagados").textContent = pagados;
+    document.getElementById("prestamosVencidos").textContent = atrasados;
+}
+
+// ✅ Crear préstamo real
+document.getElementById("formPrestamo").addEventListener("submit", async e => {
+    e.preventDefault();
+
+    const nuevo = {
+        cliente_id: parseInt(clienteSelect.value),
+        monto_inicial: parseFloat(monto.value),
+        tasa_interes: parseFloat(interes.value),
+        fecha_inicio: inicio.value,
+        fecha_limite: limite.value
+    };
+
+    const res = await fetch(`${API}/prestamos`, {
+        method: "POST",
+        headers: {
+            "Authorization": "Bearer " + token,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(nuevo)
+    });
+
+    if (res.ok) {
+        alert("✅ Préstamo creado correctamente");
+        toggleModal(false);
+        cargarPrestamos();
+    } else {
+        alert("❌ Error creando préstamo");
+    }
+});
+
+// ✅ Eliminar préstamo
+async function eliminarPrestamo(id) {
+    if (!confirm("¿Eliminar préstamo?")) return;
+
+    const res = await fetch(`${API}/prestamos/${id}`, {
+        method: "DELETE",
+        headers: { "Authorization": "Bearer " + token }
+    });
+
+    if (res.ok) {
+        alert("✅ Préstamo eliminado");
+        cargarPrestamos();
+    } else {
+        alert("❌ Error al eliminar");
+    }
+}
+
+</script>
+
+</body>
+</html>

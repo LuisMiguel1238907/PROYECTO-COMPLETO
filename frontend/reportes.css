@@ -1,0 +1,314 @@
+/* ==== ESTILOS DEL HEADER ==== */
+    .report-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(90deg, #1e40af, #1d4ed8);
+      color: white;
+      padding: 1rem 2rem;
+      border-radius: 0.5rem 0.5rem 0 0;
+    }
+
+    .header-text h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .header-text .subtitle {
+      font-size: 0.9rem;
+      opacity: 0.9;
+      margin-top: 0.2rem;
+    }
+
+    /* ==== BOTÓN AZUL ==== */
+    .btn-volver-panel {
+      background: #2563eb;
+      color: #ffffff;
+      border: none;
+      padding: 0.6rem 1.3rem;
+      border-radius: 0.6rem;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.2s ease;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-volver-panel:hover {
+      background: #1d4ed8;
+      transform: translateY(-2px);
+    }
+
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background: #f3f4f6;
+  font-size: 0.9rem;
+  margin: 0;
+  padding: 0;
+  color: #111827;
+}
+
+/* Contenedor general */
+.report-container {
+  max-width: 1250px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+/* ==================================== */
+/* ENCABEZADO                           */
+/* ==================================== */
+.report-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  margin-bottom: 1.8rem;
+}
+
+.header-text h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+  color: #111827;
+}
+
+.header-text .subtitle {
+  color: #6b7280;
+  font-size: 0.9rem;
+  margin-top: 0.3rem;
+}
+
+/* ==================================== */
+/* FILTROS                              */
+/* ==================================== */
+.filters {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.filters select {
+  background: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  padding: 0.4rem 0.7rem;
+  font-size: 0.9rem;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.filters select:hover {
+  border-color: #007bff;
+}
+
+.btn {
+  border: none;
+  cursor: pointer;
+  padding: 0.45rem 0.9rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: background 0.3s ease;
+}
+
+.btn-primary {
+  background: #007bff;
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: #005ad3;
+}
+
+/* ==================================== */
+/* TARJETAS RESUMEN                     */
+/* ==================================== */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.card {
+  background: #fff;
+  border-radius: 0.8rem;
+  padding: 1.2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  text-align: center;
+}
+
+.card h3 {
+  margin: 0;
+  color: #374151;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.card p {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #007bff;
+  margin-top: 0.4rem;
+}
+
+/* ==================================== */
+/* GRÁFICOS                             */
+/* ==================================== */
+.charts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.chart h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 1rem;
+}
+
+/* Barras */
+.bar-chart {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  height: 200px;
+  background: #f9fafb;
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+}
+
+.bar {
+  flex: 1;
+  margin: 0 2px;
+  background: #007bff;
+  border-radius: 0.25rem 0.25rem 0 0;
+  transition: height 0.3s ease;
+}
+
+.bar:hover {
+  background: #005ad3;
+}
+
+/* Etiquetas de meses */
+.month-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  margin-top: 0.5rem;
+  color: #4b5563;
+}
+
+/* Circular */
+.pie-chart {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  margin: 0 auto;
+  background: conic-gradient(#007bff 0deg, #10b981 90deg, #ffaa33 180deg, #ff4444 270deg);
+  box-shadow: inset 0 0 0 6px #fff;
+}
+
+/* Leyenda */
+.legend {
+  list-style: none;
+  padding: 0;
+  margin-top: 1rem;
+  font-size: 0.85rem;
+  color: #374151;
+}
+
+.legend li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.25rem;
+}
+
+.legend .color {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.color.completado { background: #007bff; }
+.color.activo { background: #10b981; }
+.color.pendiente { background: #ffaa33; }
+.color.vencido { background: #ff4444; }
+
+/* ==================================== */
+/* TABLA DE PRÉSTAMOS                   */
+/* ==================================== */
+.table-container {
+  background: #fff;
+  border-radius: 0.8rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  padding: 1rem;
+}
+
+.table-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 1rem;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.9rem;
+  border-radius: 0.8rem;
+  overflow: hidden;
+}
+
+.report-table thead tr {
+  background: #007bff;
+  color: white;
+  text-align: center;
+}
+
+.report-table th,
+.report-table td {
+  padding: 0.75rem 1rem;
+}
+
+.report-table tbody tr:nth-child(even) {
+  background: #f9fafb;
+}
+
+.report-table tbody tr:hover {
+  background: #e9f2ff;
+}
+
+/* Badges */
+.badge {
+  display: inline-block;
+  padding: 0.3rem 0.7rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  font-size: 0.8rem;
+  color: #fff;
+}
+
+.badge.completado { background: #007bff; }
+.badge.activo { background: #10b981; }
+.badge.pendiente { background: #ffaa33; }
+.badge.vencido { background: #ff4444; }
+
+/* Celda vacía */
+.empty {
+  text-align: center;
+  color: #6b7280;
+  padding: 1rem 0;
+}
+

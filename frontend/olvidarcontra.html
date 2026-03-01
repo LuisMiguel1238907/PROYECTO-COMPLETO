@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restablecer Contraseña</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: radial-gradient(circle at top left, #0f172a, #1e293b, #111827);
+        }
+        .card {
+            background: linear-gradient(145deg, #1f2937, #0f172a);
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .card input {
+            background-color: rgba(17, 24, 39, 0.9);
+            color: #f9fafb;
+        }
+        .card input::placeholder {
+            color: #9ca3af;
+        }
+        .glow-btn {
+            background: linear-gradient(to right, #2563eb, #1e40af);
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+        }
+        .glow-btn:hover {
+            background: linear-gradient(to right, #1e3a8a, #1e40af);
+            transform: translateY(-1px);
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen text-gray-100">
+
+    <div class="card rounded-2xl shadow-2xl p-10 md:p-12 w-full max-w-md text-center">
+        
+        <!-- Ícono principal -->
+        <div class="mb-6">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" class="w-14 h-14 text-blue-500 mx-auto">
+                <path fill-rule="evenodd" d="M12 1.5a5.25 5.25 0 0 0-5.25 5.25v3a3 3 0 0 0-3 3v6.75a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3v-6.75a3 3 0 0 0-3-3v-3c0-2.9-2.35-5.25-5.25-5.25Zm3.75 8.25v-3a3.75 3.75 0 1 0-7.5 0v3h7.5Z" clip-rule="evenodd" />
+            </svg>
+        </div>
+
+        <!-- Título -->
+        <h1 class="text-3xl font-extrabold text-white mb-2">
+            Restablece tu Contraseña
+        </h1>
+        <p class="text-gray-400 mb-8">
+            Ingresa tu nueva contraseña y confírmala para continuar.
+        </p>
+
+        <!-- Formulario -->
+        <form action="/reset-success" method="POST" class="space-y-5 text-left">
+            
+            <!-- Nueva contraseña -->
+            <div class="relative">
+                <input id="new_password" name="new_password" type="password" required
+                       placeholder="Nueva Contraseña"
+                       class="w-full px-4 py-3 pl-12 rounded-lg border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20"
+                     class="w-5 h-5 text-gray-400 absolute left-4 top-3.5">
+                    <path fill-rule="evenodd" d="M10 1a4.5 4.5 0 0 0-4.5 4.5V9H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-.5V5.5A4.5 4.5 0 0 0 10 1Zm3 8V5.5a3 3 0 1 0-6 0V9h6Z" clip-rule="evenodd" />
+                </svg>
+            </div>
+
+            <!-- Confirmar contraseña -->
+            <div class="relative">
+                <input id="confirm_password" name="confirm_password" type="password" required
+                       placeholder="Confirmar Contraseña"
+                       class="w-full px-4 py-3 pl-12 rounded-lg border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20"
+                     class="w-5 h-5 text-gray-400 absolute left-4 top-3.5">
+                    <path fill-rule="evenodd" d="M10 1a4.5 4.5 0 0 0-4.5 4.5V9H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-.5V5.5A4.5 4.5 0 0 0 10 1Zm3 8V5.5a3 3 0 1 0-6 0V9h6Z" clip-rule="evenodd" />
+                </svg>
+            </div>
+
+            <!-- Botón -->
+            <button type="submit"
+                    class="glow-btn w-full py-3 text-lg font-semibold rounded-lg transition-all">
+                RESTABLECER Y ENTRAR
+            </button>
+        </form>
+
+        <!-- Enlace volver -->
+        <div class="mt-8">
+            <a href="index2.html" class="text-blue-400 hover:text-blue-300 font-medium transition-all text-sm">
+                &larr; Volver al inicio de sesión
+            </a>
+        </div>
+    </div>
+
+</body>
+</html>

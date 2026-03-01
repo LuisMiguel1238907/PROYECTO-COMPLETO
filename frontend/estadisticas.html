@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Estadísticas del Cliente - Gestión Financiera</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { 
+      background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%); 
+      font-family: 'Poppins', sans-serif; 
+      min-height: 100vh; 
+    }
+    .card { 
+      transition: all 0.3s ease; 
+      border-radius: 1.5rem; 
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08); 
+    }
+    .card:hover { 
+      transform: translateY(-6px); 
+      box-shadow: 0 20px 40px rgba(0,0,0,0.15); 
+    }
+    .btn-volver { 
+      background: #2563eb; 
+      color: white; 
+      font-weight: 700; 
+      padding: 0.625rem 1.5rem; 
+      border-radius: 0.75rem; 
+      box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2); 
+      transition: all 0.3s ease; 
+      display: flex; 
+      align-items: center; 
+      gap: 0.5rem; 
+    }
+    .btn-volver:hover { 
+      background: #1d4ed8; 
+      transform: scale(1.05); 
+      box-shadow: 0 15px 30px rgba(37, 99, 235, 0.3); 
+    }
+    .chart-container { 
+      background: white; 
+      border-radius: 1.5rem; 
+      padding: 1.5rem; 
+      box-shadow: 0 8px 25px rgba(0,0,0,0.08); 
+    }
+    .table-row:hover { 
+      background: #f8fafc; 
+    }
+    .status-paid { 
+      background: #d1fae5; 
+      color: #065f46; 
+      font-weight: 600; 
+      padding: 0.25rem 0.75rem; 
+      border-radius: 9999px; 
+      font-size: 0.75rem; 
+    }
+    .status-pending { 
+      background: #fef3c7; 
+      color: #92400e; 
+      font-weight: 600; 
+      padding: 0.25rem 0.75rem; 
+      border-radius: 9999px; 
+      font-size: 0.75rem; 
+    }
+    .status-late { 
+      background: #fee2e2; 
+      color: #991b1b; 
+      font-weight: 600; 
+      padding: 0.25rem 0.75rem; 
+      border-radius: 9999px; 
+      font-size: 0.75rem; 
+    }
+  </style>
+</head>
+<body class="min-h-screen">
+
+  <!-- HEADER CON BOTÓN VOLVER -->
+  <header class="bg-gradient-to-r from-blue-700 to-blue-900 text-white shadow-xl py-5 px-8 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto flex justify-between items-center">
+      <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">Estadísticas del Cliente</h1>
+      <a href="clientes.html" class="btn-volver">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+        </svg>
+        Volver a clientes
+      </a>
+    </div>
+  </header>
+
+  <!-- CONTENIDO -->
+  <main class="max-w-7xl mx-auto p-6 md:p-10">
+
+    <!-- TARJETAS DE RESUMEN -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+      <div id="cardPagos" class="card bg-gradient-to-br from-blue-600 to-blue-800 text-white p-8">
+        <h2 class="text-lg font-semibold opacity-90">Pagos Completados</h2>
+        <p class="text-4xl font-extrabold mt-3">0</p>
+        <div class="mt-2 h-1 bg-white opacity-30 rounded-full"></div>
+      </div>
+
+      <div id="cardSaldo" class="card bg-gradient-to-br from-green-600 to-emerald-700 text-white p-8">
+        <h2 class="text-lg font-semibold opacity-90">Saldo Pendiente</h2>
+        <p class="text-4xl font-extrabold mt-3">$0</p>
+        <div class="mt-2 h-1 bg-white opacity-30 rounded-full"></div>
+      </div>
+
+      <div id="cardUltimo" class="card bg-gradient-to-br from-purple-600 to-pink-600 text-white p-8">
+        <h2 class="text-lg font-semibold opacity-90">Último Pago</h2>
+        <p class="text-3xl font-extrabold mt-3">—</p>
+        <div class="mt-2 h-1 bg-white opacity-30 rounded-full"></div>
+      </div>
+    </div>
+
+    <!-- GRÁFICOS -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-12">
+      <div class="chart-container">
+        <h3 class="text-xl font-bold text-gray-800 mb-5 text-center flex items-center justify-center gap-2">
+          <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+          </svg>
+          Pagos por Mes
+        </h3>
+        <canvas id="pagosMesChart" height="100"></canvas>
+      </div>
+
+      <div class="chart-container">
+        <h3 class="text-xl font-bold text-gray-800 mb-5 text-center flex items-center justify-center gap-2">
+          <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 0112 3c4.418 0 8 3.582 8 8 0 1.657-.513 3.2-1.388 4.47"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 21a9.001 9.001 0 01-8.612-6.445"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 21v-6"></path>
+          </svg>
+          Distribución de Pagos
+        </h3>
+        <canvas id="distribucionPagosChart" height="100"></canvas>
+      </div>
+    </div>
+
+    <!-- HISTORIAL DE PAGOS -->
+    <div class="bg-white rounded-3xl shadow-xl p-8 border border-gray-100">
+      <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+        <svg class="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+        Historial de Pagos
+      </h2>
+      <div class="overflow-x-auto">
+        <table class="min-w-full">
+          <thead>
+            <tr class="text-left text-gray-600 text-sm font-semibold uppercase tracking-wider border-b-2 border-gray-200">
+              <th class="py-4 px-6">#</th>
+              <th class="py-4 px-6">Cliente</th>
+              <th class="py-4 px-6">Fecha</th>
+              <th class="py-4 px-6">Monto</th>
+              <th class="py-4 px-6">Estado</th>
+            </tr>
+          </thead>
+          <tbody id="tablaHistorial" class="divid-y divide-gray-100"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const KEY_PAGOS = 'pagos';
+      const KEY_CLIENTES = 'clientes';
+
+      let pagos = [];
+      let clientes = [];
+      let chartMes, chartDist;
+
+      function cargarDatos() {
+        clientes = JSON.parse(localStorage.getItem(KEY_CLIENTES)) || [];
+        pagos = JSON.parse(localStorage.getItem(KEY_PAGOS)) || [];
+      }
+
+      function sincronizarDatos() {
+        const hoy = new Date().toISOString().split('T')[0];
+        let cambios = false;
+
+        clientes.forEach(c => {
+          const cedula = c.cedula?.trim();
+          const nombre = c.nombre?.trim();
+          const monto = parseFloat(c.monto) || 0;
+          const fecha = c.fecha || hoy;
+
+          if (!cedula || !nombre || monto <= 0) return;
+
+          let pago = pagos.find(p => p.cedula === cedula);
+
+          if (!pago) {
+            pago = {
+              codigo: `PAG-${Date.now()}-${Math.floor(Math.random() * 100)}`,
+              cedula, nombre, monto, fecha,
+              estado: fecha < hoy ? 'Atrasado' : 'Pendiente',
+              metodo: 'Sin método'
+            };
+            pagos.push(pago);
+            cambios = true;
+          } else {
+            if (pago.monto !== monto || pago.fecha !== fecha || pago.nombre !== nombre) {
+              pago.monto = monto;
+              pago.fecha = fecha;
+              pago.nombre = nombre;
+              cambios = true;
+            }
+            if (pago.estado !== 'Pagado') {
+              pago.estado = fecha < hoy ? 'Atrasado' : 'Pendiente';
+            }
+          }
+        });
+
+        const cedulasValidas = clientes.map(c => c.cedula?.trim()).filter(Boolean);
+        pagos = pagos.filter(p => cedulasValidas.includes(p.cedula));
+        cambios = true;
+
+        if (cambios) {
+          localStorage.setItem(KEY_PAGOS, JSON.stringify(pagos));
+        }
+      }
+
+      function actualizarTodo() {
+        cargarDatos();
+        sincronizarDatos();
+        renderizarResumen();
+        renderizarGraficos();
+        renderizarHistorial();
+      }
+
+      function renderizarResumen() {
+        const pagados = pagos.filter(p => p.estado === 'Pagado');
+        const totalPrestado = clientes.reduce((sum, c) => sum + (parseFloat(c.monto) || 0), 0);
+        const totalPagado = pagados.reduce((sum, p) => sum + p.monto, 0);
+        const saldoPendiente = totalPrestado - totalPagado;
+
+        const ultimoPago = pagados.sort((a, b) => new Date(b.fecha) - new Date(a.fecha))[0];
+        const fechaUltimo = ultimoPago ? formatFecha(ultimoPago.fecha) : '—';
+
+        document.querySelector('#cardPagos p').textContent = pagados.length;
+        document.querySelector('#cardSaldo p').textContent = `$${saldoPendiente.toLocaleString('es-DO')}`;
+        document.querySelector('#cardUltimo p').textContent = fechaUltimo;
+      }
+
+      function renderizarGraficos() {
+        const pagosPorMes = {};
+        const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+
+        pagos.filter(p => p.estado === 'Pagado').forEach(p => {
+          const fecha = new Date(p.fecha);
+          const mes = meses[fecha.getMonth()];
+          const clave = `${mes} ${fecha.getFullYear()}`;
+          pagosPorMes[clave] = (pagosPorMes[clave] || 0) + p.monto;
+        });
+
+        const labels = Object.keys(pagosPorMes).sort((a, b) => {
+          const [m1, y1] = a.split(' '); const [m2, y2] = b.split(' ');
+          return new Date(`${m1} 1, ${y1}`) - new Date(`${m2} 1, ${y2}`);
+        }).slice(-6);
+
+        const data = labels.map(l => pagosPorMes[l] || 0);
+
+        if (chartMes) chartMes.destroy();
+        chartMes = new Chart(document.getElementById('pagosMesChart'), {
+          type: 'line',
+          data: { 
+            labels, 
+            datasets: [{ 
+              label: 'Pagos', 
+              data, 
+              borderColor: '#3b82f6', 
+              backgroundColor: 'rgba(59, 130, 246, 0.15)', 
+              fill: true, 
+              tension: 0.4, 
+              pointBackgroundColor: '#3b82f6', 
+              pointRadius: 5 
+            }] 
+          },
+          options: { 
+            plugins: { legend: { display: false } }, 
+            scales: { y: { beginAtZero: true } } 
+          }
+        });
+
+        const pagados = pagos.filter(p => p.estado === 'Pagado').length;
+        const pendientes = pagos.filter(p => p.estado === 'Pendiente').length;
+        const atrasados = pagos.filter(p => p.estado === 'Atrasado').length;
+
+        if (chartDist) chartDist.destroy();
+        chartDist = new Chart(document.getElementById('distribucionPagosChart'), {
+          type: 'doughnut',
+          data: {
+            labels: ['Pagado', 'Pendiente', 'Atrasado'],
+            datasets: [{ 
+              data: [pagados, pendientes, atrasados], 
+              backgroundColor: ['#10b981', '#f59e0b', '#ef4444'], 
+              borderWidth: 3, 
+              borderColor: '#fff' 
+            }]
+          },
+          options: { 
+            plugins: { 
+              legend: { 
+                position: 'bottom', 
+                labels: { padding: 20, font: { size: 14, weight: '600' } } 
+              } 
+            } 
+          }
+        });
+      }
+
+      function renderizarHistorial() {
+        const tbody = document.getElementById('tablaHistorial');
+        tbody.innerHTML = '';
+
+        if (pagos.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="5" class="py-12 text-center text-gray-500 text-lg">No hay pagos registrados.</td></tr>`;
+          return;
+        }
+
+        pagos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha)).forEach((p, i) => {
+          const cliente = clientes.find(c => c.cedula === p.cedula) || {};
+          const fila = document.createElement('tr');
+          fila.className = 'table-row text-gray-700';
+          fila.innerHTML = `
+            <td class="py-4 px-6 font-medium">${i + 1}</td>
+            <td class="py-4 px-6">${cliente.nombre || '—'}</td>
+            <td class="py-4 px-6">${formatFecha(p.fecha)}</td>
+            <td class="py-4 px-6 font-semibold">$${p.monto.toLocaleString('es-DO')}</td>
+            <td class="py-4 px-6">
+              <span class="${p.estado === 'Pagado' ? 'status-paid' : p.estado === 'Atrasado' ? 'status-late' : 'status-pending'}">
+                ${p.estado}
+              </span>
+            </td>
+          `;
+          tbody.appendChild(fila);
+        });
+      }
+
+      function formatFecha(fechaStr) {
+        const fecha = new Date(fechaStr);
+        const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+        return `${meses[fecha.getMonth()]} ${fecha.getDate()} / ${fecha.getFullYear()}`;
+      }
+
+      actualizarTodo();
+
+      window.addEventListener('storage', (e) => {
+        if (e.key === KEY_PAGOS || e.key === KEY_CLIENTES) actualizarTodo();
+      });
+
+      setInterval(actualizarTodo, 2000);
+    });
+  </script>
+</body>
+</html>

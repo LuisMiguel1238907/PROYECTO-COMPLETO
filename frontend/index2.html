@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Iniciar Sesión - Sistema Financiero</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background: radial-gradient(circle at top left, #0f172a, #1e293b, #111827);
+      overflow: hidden;
+    }
+    .card {
+      background: linear-gradient(145deg, #1f2937, #0f172a);
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 0 25px rgba(0, 0, 0, 0.7);
+      transition: all 0.4s ease;
+    }
+    .input-field {
+      background-color: rgba(17, 24, 39, 0.9);
+      color: #f9fafb;
+      border: 1px solid #374151;
+    }
+    .input-field::placeholder {
+      color: #9ca3af;
+    }
+    .glow-btn {
+      background: linear-gradient(to right, #2563eb, #1e40af);
+      box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+      transition: all 0.3s ease;
+    }
+    .glow-btn:hover {
+      background: linear-gradient(to right, #1d4ed8, #1e3a8a);
+      transform: translateY(-1px);
+    }
+
+    /* Fondo oscuro al cargar */
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.95);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .loading-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Moneda girando */
+    .coin {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #3b82f6, #1e3a8a);
+      box-shadow: inset 0 0 10px rgba(255,255,255,0.2), 0 0 20px rgba(37, 99, 235, 0.5);
+      position: relative;
+      animation: spin 1.5s infinite linear;
+    }
+
+    .coin::before {
+      content: "💰";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(1.3);
+      font-size: 40px;
+      text-shadow: 0 0 10px rgba(255,255,255,0.5);
+    }
+
+    @keyframes spin {
+      0% { transform: rotateY(0deg); }
+      100% { transform: rotateY(360deg); }
+    }
+
+    /* Texto debajo de la moneda */
+    .loading-text {
+      margin-top: 20px;
+      font-size: 1.1rem;
+      color: #93c5fd;
+      letter-spacing: 1px;
+      animation: pulse 1.2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+  </style>
+</head>
+
+<body class="flex items-center justify-center min-h-screen text-gray-100">
+
+  <!-- Pantalla principal -->
+  <div class="card rounded-2xl p-10 md:p-12 w-full max-w-md text-center">
+      
+      <!-- Icono -->
+      <div class="mb-8">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24" 
+              class="w-14 h-14 text-blue-500 mx-auto">
+              <path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0v3.75a2.25 2.25 0 0 0 1.5 2.166V21a2.25 2.25 0 0 1-2.25 2.25h-9A2.25 2.25 0 0 1 2.25 21v-8.084a2.25 2.25 0 0 0 1.5-2.166V6ZM14.25 9v-.75a2.25 2.25 0 1 0-4.5 0V9h4.5Z" clip-rule="evenodd" />
+          </svg>
+      </div>
+
+      <h1 class="text-3xl font-extrabold text-white mb-2 tracking-tight">
+          Iniciar Sesión
+      </h1>
+      <p class="text-gray-400 mb-8">
+          Accede al panel de control de tu sistema de préstamos.
+      </p>
+      
+      <!-- FORMULARIO -->
+      <form id="loginForm" class="space-y-6 text-left">
+          <div class="relative">
+              <input id="email" name="email" type="email" required placeholder="Correo Electrónico"
+                    class="input-field w-full px-4 py-3 pl-12 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" 
+                  viewBox="0 0 20 20" class="w-5 h-5 text-gray-400 absolute left-4 top-3.5">
+                  <path d="M3 4a2 2 0 0 0-2 2v1.161l8.735 5.507a1 1 0 0 0 1.29 0L19 7.162V6a2 2 0 0 0-2-2H3Z" />
+                  <path d="m2.16 8.038 6.592 4.154a3 3 0 0 0 3.896 0l6.592-4.153A1 1 0 0 0 19 8.157V14a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8.157c0-.269.13-.52.345-.668Z" />
+              </svg>
+          </div>
+
+          <div class="relative">
+              <input id="password" name="password" type="password" required placeholder="Contraseña"
+                    class="input-field w-full px-4 py-3 pl-12 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" 
+                  viewBox="0 0 20 20" class="w-5 h-5 text-gray-400 absolute left-4 top-3.5">
+                  <path fill-rule="evenodd" d="M10 1a4.5 4.5 0 0 0-4.5 4.5V9H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-.5V5.5A4.5 4.5 0 0 0 10 1Zm3 8V5.5a3 3 0 1 0-6 0V9h6Z" clip-rule="evenodd" />
+              </svg>
+          </div>
+
+          <div>
+              <button type="button" id="loginBtn"
+                  class="glow-btn inline-block w-full px-8 py-3 text-white text-lg font-semibold rounded-lg transition duration-300 transform text-center">
+                  INGRESAR
+              </button>
+          </div>
+
+          <div class="text-sm text-center">
+              <a href="olvidarcontra.html" class="text-blue-400 hover:text-blue-300 font-medium transition-all">
+                  ¿Olvidaste tu contraseña?
+              </a>
+          </div>
+      </form>
+  </div>
+
+  <!-- Overlay con animación -->
+  <div id="loadingOverlay" class="loading-overlay">
+      <div class="text-center">
+          <div class="coin"></div>
+          <p class="loading-text">Validando acceso...</p>
+      </div>
+  </div>
+
+ <script>
+  const loginBtn = document.getElementById("loginBtn");
+  const overlay = document.getElementById("loadingOverlay");
+
+  loginBtn.addEventListener("click", async () => {
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+
+    if (!email || !password) {
+      alert("Por favor ingresa email y contraseña");
+      return;
+    }
+
+    overlay.classList.add("active");
+
+    try {
+      const resp = await fetch("http://127.0.0.1:8000/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: email,    // ✅ AQUÍ EL CAMBIO
+          password: password
+        })
+      });
+
+      if (!resp.ok) {
+        overlay.classList.remove("active");
+        alert("Credenciales incorrectas");
+        return;
+      }
+
+      const data = await resp.json();
+
+      // ✅ Guardamos token
+      localStorage.setItem("token", data.access_token);
+
+      // ✅ Redirigir al dashboard
+      window.location.href = "index3.html";
+
+    } catch (error) {
+      overlay.classList.remove("active");
+      alert("Error conectando con el servidor");
+      console.error(error);
+    }
+  });
+</script>
+
+  
+
+
+</body>
+</html>
+

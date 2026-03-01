@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel de Control - Sistema de Préstamos</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+
+  <style>
+    .sidebar {
+      width: 16rem;
+      background: linear-gradient(180deg, #111827 0%, #1f2937 100%);
+      transition: all 0.3s ease;
+    }
+    .sidebar:hover { box-shadow: 0 0 25px rgba(59,130,246,0.3); }
+    .card { transition: all 0.3s ease; }
+    .card:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+  </style>
+</head>
+
+<body class="bg-gray-100 font-sans antialiased">
+  <div class="flex">
+    <aside class="sidebar fixed h-screen text-white p-6 shadow-xl">
+      <h1 class="text-2xl font-bold mb-10 border-b border-gray-700 pb-3 text-center text-blue-400">💼 Mi Sistema</h1>
+      <nav>
+        <ul>
+          <li class="mb-4"><a href="#" class="block p-3 rounded-lg bg-blue-600 text-white font-semibold shadow-md">🏠 Dashboard</a></li>
+          <li class="mb-3"><a href="clientes.html" class="block p-2 rounded hover:bg-gray-700 transition">👥 Clientes</a></li>
+          <li class="mb-3"><a href="prestamos.html" class="block p-2 rounded hover:bg-gray-700 transition">💰 Préstamos</a></li>
+          <li class="mb-3"><a href="pagos.html" class="block p-2 rounded hover:bg-gray-700 transition">💳 Pagos</a></li>
+          <li class="mb-3"><a href="reportes.html" class="block p-2 rounded hover:bg-gray-700 transition">📊 Reportes</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <main class="ml-64 flex-1 min-h-screen p-8">
+      <header class="flex justify-between items-center mb-10">
+        <div class="flex items-center gap-5">
+          <span id="usuarioNombre" class="text-gray-700 font-medium">Cargando...</span>
+          <img src="https://cdn-icons-png.flaticon.com/512/1077/1077012.png" class="w-10 h-10 rounded-full border-2 border-blue-400 shadow" alt="perfil">
+        </div>
+      </header>
+
+      <h1 class="text-4xl font-bold text-gray-800 mb-2">Panel de Control</h1>
+      <p class="text-gray-600 mb-10 text-lg">Monitorea préstamos, clientes y ganancias en tiempo real 🚀</p>
+
+      <!-- TARJETAS -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <div class="bg-white p-6 rounded-2xl shadow card border-l-4 border-blue-500">
+          <h2 class="text-gray-600 text-sm font-semibold uppercase mb-2">Total de Clientes</h2>
+          <p id="total_clientes" class="text-3xl font-bold text-blue-600">0</p>
+          <p class="text-green-600 text-sm mt-1">Registrados</p>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow card border-l-4 border-yellow-500">
+          <h2 class="text-gray-600 text-sm font-semibold uppercase mb-2">Préstamos Activos</h2>
+          <p id="prestamos_activos" class="text-3xl font-bold text-yellow-600">0</p>
+          <p class="text-gray-500 text-sm mt-1">En Proceso</p>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow card border-l-4 border-green-500">
+          <h2 class="text-gray-600 text-sm font-semibold uppercase mb-2">Ganancias (Interés)</h2>
+          <p id="total_ganancias" class="text-3xl font-bold text-green-600">$0</p>
+          <p class="text-gray-500 text-sm mt-1">Acumuladas</p>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow card border-l-4 border-red-500">
+          <h2 class="text-gray-600 text-sm font-semibold uppercase mb-2">Préstamos Atrasados</h2>
+          <p id="prestamos_atrasados" class="text-3xl font-bold text-red-600">0</p>
+          <p class="text-yellow-600 text-sm mt-1">A revisar</p>
+        </div>
+      </div>
+
+      <!-- GRAFICO -->
+      <div class="bg-white p-6 rounded-2xl shadow card mb-12">
+        <h2 class="text-xl font-semibold text-gray-700 mb-4">📊 Distribución de Estados de Préstamos</h2>
+        <div class="max-w-lg mx-auto">
+          <canvas id="graficoPrestamos" height="300"></canvas>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow card border-l-4 border-green-500 mt-6">
+          <h2 class="text-gray-600 text-sm font-semibold uppercase mb-2">Préstamos Pagados</h2>
+          <p id="prestamos_pagados" class="text-3xl font-bold text-green-600">0</p>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow card border-l-4 border-blue-500 mt-4">
+          <h2 class="text-gray-600 text-sm font-semibold uppercase mb-2">Total Préstamos</h2>
+          <p id="total_prestamos" class="text-3xl font-bold text-blue-600">0</p>
+        </div>
+
+      </div>
+
+      <footer class="text-center text-gray-500 text-sm mt-10 mb-4">
+        © 2025 Sistema de Préstamos — Desarrollado por el grupo 💻
+      </footer>
+    </main>
+  </div>
+
+<script>
+  const token = localStorage.getItem("token");
+  const API_URL = "http://127.0.0.1:8000";
+  let graficoPrestamos = null;
+
+  if (!token) {
+    alert("Debes iniciar sesión");
+    window.location.href = "index2.html";
+  }
+
+  // ✅ Cargar datos del usuario
+  async function cargarUsuario() {
+    const resp = await fetch(`${API_URL}/auth/me`, {
+      headers: { "Authorization": "Bearer " + token }
+    });
+
+    if (resp.ok) {
+      const user = await resp.json();
+      document.getElementById("usuarioNombre").textContent = user.nombre;
+    }
+  }
+
+  // ✅ Cargar información del Dashboard
+  async function cargarDashboard() {
+    try {
+      const resp = await fetch(`${API_URL}/dashboard/resumen`, {
+        headers: { "Authorization": "Bearer " + token }
+      });
+
+      if (!resp.ok) {
+        alert("Sesión expirada");
+        localStorage.removeItem("token");
+        window.location.href = "index2.html";
+        return;
+      }
+
+      const data = await resp.json();
+
+      document.getElementById("total_clientes").textContent = data.total_clientes;
+      document.getElementById("prestamos_activos").textContent = data.prestamos_activos;
+      document.getElementById("prestamos_pagados").textContent = data.prestamos_pagados;
+      document.getElementById("prestamos_atrasados").textContent = data.prestamos_atrasados;
+      document.getElementById("total_ganancias").textContent = "$" + data.ganancias_interes;
+      document.getElementById("total_prestamos").textContent = data.total_prestamos;
+
+      renderizarGrafico(data);
+
+    } catch (e) {
+      console.log("Error conectado con servidor", e);
+    }
+  }
+
+  function renderizarGrafico(data) {
+    const ctx = document.getElementById("graficoPrestamos").getContext("2d");
+
+    if (graficoPrestamos) { graficoPrestamos.destroy(); }
+
+    graficoPrestamos = new Chart(ctx, {
+      type: "doughnut",
+      data: {
+        labels: ["Activos", "Pagados", "Atrasados"],
+        datasets: [{
+          data: [
+            data.prestamos_activos,
+            data.prestamos_pagados,
+            data.prestamos_atrasados
+          ],
+          backgroundColor: ["#FACC15", "#10B981", "#EF4444"]
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: true, position: "bottom" } }
+      },
+      plugins: [ChartDataLabels]
+    });
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    cargarUsuario();
+    cargarDashboard();
+  });
+</script>
+
+</body>
+</html>

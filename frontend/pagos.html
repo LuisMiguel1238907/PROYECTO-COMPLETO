@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pagos - Sistema de Préstamos</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+
+  <div class="flex">
+    <!-- Sidebar -->
+    <aside class="w-64 h-screen bg-gray-900 text-white p-6">
+      <h2 class="text-xl font-bold text-blue-400 mb-6">💵 Pagos</h2>
+
+      <nav class="space-y-2">
+        <a href="index3.html" class="block p-2 hover:bg-gray-700 rounded">🏠 Dashboard</a>
+        <a href="clientes.html" class="block p-2 hover:bg-gray-700 rounded">👥 Clientes</a>
+        <a href="prestamos.html" class="block p-2 hover:bg-gray-700 rounded">💳 Préstamos</a>
+        <a href="#" class="block p-2 bg-gray-700 rounded font-semibold">💵 Pagos</a>
+        <a href="reportes.html" class="block p-2 hover:bg-gray-700 rounded">📊 Reportes</a>
+        <a href="configuracion.html" class="block p-2 hover:bg-gray-700 rounded">⚙️ Configuración</a>
+      </nav>
+    </aside>
+
+    <!-- CONTENIDO -->
+    <main class="flex-1 p-10">
+
+      <h1 class="text-3xl font-bold text-gray-800 mb-6">Registro de Pagos</h1>
+
+      <!-- RESUMEN -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+        <div class="bg-white p-4 rounded shadow">
+          <h2 class="text-sm text-gray-600">Total Pagos Hoy</h2>
+          <p id="totalPagosHoy" class="text-2xl font-bold text-blue-600">$0</p>
+        </div>
+        <div class="bg-white p-4 rounded shadow">
+          <h2 class="text-sm text-gray-600">Pendientes</h2>
+          <p id="pagosPendientes" class="text-2xl font-bold text-yellow-500">0</p>
+        </div>
+        <div class="bg-white p-4 rounded shadow">
+          <h2 class="text-sm text-gray-600">Completados</h2>
+          <p id="pagosCompletados" class="text-2xl font-bold text-green-500">0</p>
+        </div>
+        <div class="bg-white p-4 rounded shadow">
+          <h2 class="text-sm text-gray-600">Ingresos del Mes</h2>
+          <p id="ingresosMes" class="text-2xl font-bold text-blue-600">$0</p>
+        </div>
+      </div>
+
+      <!-- FORMULARIO -->
+      <div class="bg-white p-6 rounded shadow mb-10">
+
+        <h2 class="text-xl font-bold text-gray-700 mb-4">Registrar Nuevo Pago</h2>
+
+        <form id="paymentForm" class="grid grid-cols-2 gap-4">
+
+          <div class="col-span-2">
+            <label class="block text-gray-600 mb-1">Cliente</label>
+            <select id="clienteSelect" class="w-full p-2 border rounded"></select>
+          </div>
+
+          <div>
+            <label class="block text-gray-600 mb-1">Préstamo</label>
+            <select id="prestamoSelect" class="w-full p-2 border rounded"></select>
+          </div>
+
+          <div>
+            <label class="block text-gray-600 mb-1">Monto</label>
+            <input type="number" id="monto" class="w-full p-2 border rounded">
+          </div>
+
+          <div>
+            <label class="block text-gray-600 mb-1">Fecha</label>
+            <input type="date" id="fecha" class="w-full p-2 border rounded">
+          </div>
+
+          <div>
+            <label class="block text-gray-600 mb-1">Estado</label>
+            <select id="estado" class="w-full p-2 border rounded">
+              <option value="Completado">Completado</option>
+              <option value="Pendiente">Pendiente</option>
+            </select>
+          </div>
+
+          <div class="col-span-2 flex justify-end">
+            <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded w-full" type="submit">
+              💸 Registrar Pago
+            </button>
+          </div>
+
+        </form>
+      </div>
+
+      <!-- TABLA -->
+      <div class="bg-white p-6 rounded shadow">
+        <h2 class="text-xl font-bold text-gray-700 mb-4">Historial de Pagos</h2>
+
+        <table class="w-full">
+          <thead class="bg-gray-200">
+            <tr>
+              <th class="p-2">Cliente</th>
+              <th class="p-2">Préstamo</th>
+              <th class="p-2">Monto</th>
+              <th class="p-2">Fecha</th>
+              <th class="p-2">Estado</th>
+            </tr>
+          </thead>
+          <tbody id="tablaPagos"></tbody>
+        </table>
+
+      </div>
+
+    </main>
+  </div>
+
+<script>
+
+const API = "http://127.0.0.1:8000";
+const token = localStorage.getItem("token");
+
+// ✅ Si no está logueado
+if (!token) window.location.href = "index2.html";
+
+document.addEventListener("DOMContentLoaded", () => {
+    cargarClientes();
+    cargarPagos();
+});
+
+// ✅ Cargar clientes reales
+async function cargarClientes() {
+    const res = await fetch(`${API}/clientes`, {
+        headers: { "Authorization": "Bearer " + token }
+    });
+
+    const data = await res.json();
+    const select = document.getElementById("clienteSelect");
+    select.innerHTML = '<option value="">Seleccione</option>';
+
+    data.forEach(c => {
+        const op = document.createElement("option");
+        op.value = c.id;
+        op.textContent = c.nombre;
+        select.appendChild(op);
+    });
+
+    // Cuando cambie el cliente → cargar sus préstamos
+    select.addEventListener("change", e => cargarPrestamosPorCliente(e.target.value));
+}
+
+// ✅ Cargar préstamos del cliente
+async function cargarPrestamosPorCliente(id) {
+    const res = await fetch(`${API}/prestamos/cliente/${id}`, {
+        headers: { "Authorization": "Bearer " + token }
+    });
+
+    const data = await res.json();
+    const select = document.getElementById("prestamoSelect");
+    select.innerHTML = '<option value="">Seleccione préstamo</option>';
+
+    data.forEach(p => {
+        const op = document.createElement("option");
+        op.value = p.id;
+        op.textContent = `#${p.id} - $${(p.monto_inicial + p.total_interes).toLocaleString()}`;
+        select.appendChild(op);
+    });
+}
+
+// ✅ Registrar pago real
+document.getElementById("paymentForm").addEventListener("submit", async e => {
+    e.preventDefault();
+
+    const pago = {
+        cliente_id: parseInt(clienteSelect.value),
+        prestamo_id: parseInt(prestamoSelect.value),
+        monto_pagado: parseFloat(monto.value),
+        fecha_pago: fecha.value,
+        estado: estado.value
+    };
+
+    const res = await fetch(`${API}/pagos`, {
+        method: "POST",
+        headers: {
+            "Authorization": "Bearer " + token,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(pago)
+    });
+
+    if (res.ok) {
+        alert("✅ Pago registrado");
+        cargarPagos();
+        document.getElementById("paymentForm").reset();
+    } else {
+        alert("❌ Error registrando pago");
+    }
+});
+
+// ✅ Cargar pagos reales
+async function cargarPagos() {
+    const res = await fetch(`${API}/pagos`, {
+        headers: { "Authorization": "Bearer " + token }
+    });
+
+    const pagos = await res.json();
+    const tbody = document.getElementById("tablaPagos");
+
+    tbody.innerHTML = "";
+
+    let totalHoy = 0, pend = 0, comp = 0, ingresosMes = 0;
+
+    pagos.forEach(p => {
+        const monto = p.monto_pagado;
+        const fecha = p.fecha_pago.split("T")[0];
+        const hoy = new Date().toISOString().split("T")[0];
+
+        if (fecha === hoy) totalHoy += monto;
+        if (p.estado === "Pendiente") pend++;
+        if (p.estado === "Completado") comp++;
+
+        if (new Date(p.fecha_pago).getMonth() === new Date().getMonth()) {
+            ingresosMes += monto;
+        }
+
+        const fila = `
+            <tr class="border-b">
+                <td class="p-2">${p.cliente ? p.cliente.nombre : "—"}</td>
+                <td class="p-2">${p.prestamo_id}</td>
+                <td class="p-2">$${monto.toLocaleString()}</td>
+                <td class="p-2">${fecha}</td>
+                <td class="p-2 font-bold ${p.estado === "Completado" ? "text-green-600" : "text-yellow-600"}">${p.estado}</td>
+            </tr>
+        `;
+        tbody.innerHTML += fila;
+    });
+
+    document.getElementById("totalPagosHoy").textContent = "$" + totalHoy.toLocaleString();
+    document.getElementById("pagosPendientes").textContent = pend;
+    document.getElementById("pagosCompletados").textContent = comp;
+    document.getElementById("ingresosMes").textContent = "$" + ingresosMes.toLocaleString();
+}
+
+</script>
+
+</body>
+</html>

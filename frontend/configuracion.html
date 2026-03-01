@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Configuración - Sistema de Préstamos</title>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      background: #e8eef6;
+    }
+    .navbar {
+      background: #1f2937;
+      padding: 15px 35px;
+      color: white;
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+    }
+    .navbar a {
+      color: #d1d5db;
+      text-decoration: none;
+      padding: 8px 14px;
+      transition: 0.2s;
+      font-size: 15px;
+    }
+    .navbar a:hover, .active {
+      background: #3b82f6;
+      border-radius: 6px;
+      color: white !important;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ✅ NAVBAR -->
+  <nav class="navbar">
+    <div class="text-xl flex items-center gap-2">
+      ⚙️ Configuración
+    </div>
+
+    <div class="flex gap-2">
+      <a href="index3.html">Inicio</a>
+      <a href="clientes.html">Clientes</a>
+      <a href="prestamos.html">Préstamos</a>
+      <a href="pagos.html">Pagos</a>
+      <a href="reportes.html">Reportes</a>
+      <a href="configuracion.html" class="active">Configuración</a>
+      <a href="#" onclick="logout()" class="text-red-400 hover:text-red-200">Cerrar Sesión</a>
+    </div>
+  </nav>
+
+  <!-- ✅ TÍTULO -->
+  <div class="text-center mt-8">
+    <h1 class="text-4xl font-bold text-gray-800">Centro de Configuración</h1>
+    <p class="text-gray-600 mt-1">Personaliza y gestiona tu sistema de préstamos</p>
+  </div>
+
+  <!-- ✅ CONTENIDO -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-12 py-10">
+
+    <!-- ✅ PERFIL -->
+    <div class="bg-white rounded-2xl shadow p-6">
+      <h2 class="text-xl font-bold mb-4">Perfil del Administrador</h2>
+
+      <div class="flex items-center gap-4">
+        <img src="https://cdn-icons-png.flaticon.com/512/1077/1077012.png" class="w-16" />
+
+        <div class="text-sm">
+          <p><strong>Nombre:</strong> <span id="admin-name">Cargando...</span></p>
+          <p><strong>Email:</strong> <span id="admin-email">Cargando...</span></p>
+          <p><strong>Rol:</strong> Administrador</p>
+        </div>
+      </div>
+
+      <button onclick="openEditProfileModal()" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
+        Editar Perfil
+      </button>
+    </div>
+
+    <!-- ✅ Apariencia -->
+    <div class="bg-white rounded-2xl shadow p-6">
+      <h2 class="text-xl font-bold mb-4">Apariencia</h2>
+      <p>Elige el tema del panel</p>
+      <div class="flex gap-2 mt-2">
+        <div class="w-8 h-8 bg-white border rounded cursor-pointer"></div>
+        <div class="w-8 h-8 bg-gray-800 rounded cursor-pointer"></div>
+        <div class="w-8 h-8 bg-blue-500 rounded cursor-pointer"></div>
+      </div>
+      <button class="mt-4 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg">
+        Aplicar Tema
+      </button>
+    </div>
+
+    <!-- ✅ Seguridad -->
+    <div class="bg-white rounded-2xl shadow p-6">
+      <h2 class="text-xl font-bold mb-4">Seguridad</h2>
+
+      <label class="flex items-center gap-2">
+        <input type="checkbox" id="two-factor" checked>
+        Autenticación en dos pasos
+      </label>
+
+      <label class="flex items-center gap-2">
+        <input type="checkbox" id="remember-session">
+        Recordar sesión
+      </label>
+
+      <label class="flex items-center gap-2">
+        <input type="checkbox" id="auto-lock">
+        Bloqueo automático
+      </label>
+
+      <button onclick="saveSecuritySettings()" class="mt-4 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg">
+        Guardar Cambios
+      </button>
+    </div>
+
+    <!-- ✅ Notificaciones -->
+    <div class="bg-white rounded-2xl shadow p-6">
+      <h2 class="text-xl font-bold mb-4">Notificaciones</h2>
+
+      <label><input type="checkbox" id="noti-pagos-vencidos" checked> Avisos de pagos vencidos</label><br>
+      <label><input type="checkbox" id="noti-prestamos-aprobados" checked> Nuevos préstamos aprobados</label><br>
+      <label><input type="checkbox" id="noti-resumenes"> Resúmenes diarios</label><br>
+      <label><input type="checkbox" id="noti-seguridad"> Alertas de seguridad</label><br>
+
+      <button onclick="saveNotificationSettings()" class="mt-4 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg">
+        Actualizar Preferencias
+      </button>
+    </div>
+
+    <!-- ✅ Base de datos -->
+    <div class="bg-white rounded-2xl shadow p-6">
+      <h2 class="text-xl font-bold mb-4">Base de Datos</h2>
+
+      <div class="flex gap-2">
+        <button class="bg-purple-500 text-white px-3 py-2 rounded-lg">📦 Crear Backup</button>
+        <button class="bg-purple-500 text-white px-3 py-2 rounded-lg">♻️ Restaurar</button>
+        <button class="bg-purple-500 text-white px-3 py-2 rounded-lg">📤 Exportar</button>
+      </div>
+    </div>
+
+    <!-- ✅ Soporte -->
+    <div class="bg-white rounded-2xl shadow p-6">
+      <h2 class="text-xl font-bold mb-4">Soporte Técnico</h2>
+      <p>¿Necesitas ayuda? Contáctanos.</p>
+      <p><strong>Tel:</strong> +1 800 555 1234</p>
+      <p><strong>Email:</strong> soporte@prestamopro.com</p>
+      <button class="bg-yellow-400 hover:bg-yellow-500 px-3 py-2 rounded-lg mt-3">📩 Contactar Soporte</button>
+    </div>
+
+    <!-- ✅ Más tarjetas si quieres... -->
+
+  </div>
+
+  <!-- ✅ MODAL -->
+  <div id="editProfileModal" class="hidden fixed top-0 left-0 w-full h-full bg-black bg-opacity-40 flex justify-center items-center">
+    <div class="bg-white p-6 rounded-xl shadow-xl w-80">
+      <h3 class="text-lg font-bold">Editar Perfil</h3>
+
+      <label>Nombre</label>
+      <input id="edit-name" class="border w-full p-2 rounded">
+
+      <label>Email</label>
+      <input id="edit-email" class="border w-full p-2 rounded">
+
+      <label>Contraseña</label>
+      <input id="edit-password" type="password" class="border w-full p-2 rounded">
+
+      <div class="flex justify-end gap-2 mt-4">
+        <button onclick="closeEditProfileModal()" class="px-3 py-1 bg-gray-300 rounded">Cancelar</button>
+        <button onclick="saveProfile()" class="px-3 py-1 bg-blue-500 text-white rounded">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const API_URL = "http://127.0.0.1:8000";
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    alert("Sesión expirada. Inicia sesión nuevamente.");
+    window.location.href = "index2.html";
+  }
+
+  // ✅ Cargar perfil real
+  async function loadUser() {
+    try {
+      const resp = await fetch(`${API_URL}/auth/me`, {
+        headers: { Authorization: "Bearer " + token },
+      });
+      if (!resp.ok) return;
+
+      const data = await resp.json();
+      document.getElementById("admin-name").textContent = data.nombre;
+      document.getElementById("admin-email").textContent = data.email;
+
+      document.getElementById("edit-name").value = data.nombre;
+      document.getElementById("edit-email").value = data.email;
+
+    } catch (e) {
+      console.log("Error:", e);
+    }
+  }
+
+  // ✅ Guardar cambios
+  async function saveProfile() {
+    const nombre = document.getElementById("edit-name").value;
+    const email = document.getElementById("edit-email").value;
+    const password = document.getElementById("edit-password").value;
+
+    const resp = await fetch(`${API_URL}/auth/update`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + token,
+      },
+      body: JSON.stringify({ nombre, email, password }),
+    });
+
+    if (resp.ok) {
+      alert("✅ Perfil actualizado");
+      closeEditProfileModal();
+      loadUser();
+    } else {
+      alert("Error al actualizar");
+    }
+  }
+
+  function openEditProfileModal() {
+    document.getElementById("editProfileModal").classList.remove("hidden");
+  }
+  function closeEditProfileModal() {
+    document.getElementById("editProfileModal").classList.add("hidden");
+  }
+
+  function logout() {
+    localStorage.removeItem("token");
+    window.location.href = "index2.html";
+  }
+
+  document.addEventListener("DOMContentLoaded", loadUser);
+</script>
+
+</body>
+</html>

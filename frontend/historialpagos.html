@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Historial de Pagos</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-100 font-[Poppins]">
+
+<header class="bg-blue-800 text-white p-5 shadow-lg flex justify-between items-center">
+  <h1 class="text-xl font-bold">📜 Historial de Pagos</h1>
+  <a href="clientes.html" class="bg-white text-blue-700 px-4 py-2 rounded-lg font-semibold">⬅ Volver</a>
+</header>
+
+<div class="max-w-6xl mx-auto p-6">
+
+  <!-- BUSCADOR + FILTRO -->
+  <div class="flex flex-col md:flex-row gap-3 mb-6">
+    <input id="buscar" type="text" placeholder="Buscar cliente..." 
+           class="w-full p-3 rounded-lg border border-gray-300">
+    <select id="filtroEstado" class="p-3 border rounded-lg">
+      <option value="">Todos</option>
+      <option value="Activo">Activo</option>
+      <option value="Atrasado">Atrasado</option>
+      <option value="Pagado">Pagado</option>
+    </select>
+  </div>
+
+  <div id="listaPagos" class="space-y-6"></div>
+</div>
+
+<!-- MODAL -->
+<div id="modalPago" class="fixed inset-0 bg-black/50 hidden justify-center items-center p-4">
+  <div class="bg-white w-full max-w-md p-6 rounded-xl shadow-xl">
+    <h2 class="text-xl font-bold mb-4">Registrar Pago</h2>
+
+    <label>Monto</label>
+    <input id="montoPago" type="number" class="w-full p-3 border rounded-lg mb-3">
+
+    <label>Fecha</label>
+    <input id="fechaPago" type="date" class="w-full p-3 border rounded-lg mb-3">
+
+    <div class="flex justify-end gap-3 mt-4">
+      <button onclick="cerrarModal()" class="bg-gray-300 px-4 py-2 rounded-lg">Cancelar</button>
+      <button onclick="confirmarPago()" class="bg-green-600 text-white px-4 py-2 rounded-lg">Pagar ✅</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API_URL = "http://127.0.0.1:8000";
+const token = localStorage.getItem("token");
+
+let prestamos = [];
+let pagos = [];
+let clientes = [];
+let prestamoActual = null;
+
+document.addEventListener("DOMContentLoaded", async () => {
+  await Promise.all([cargarClientes(), cargarPrestamos(), cargarPagos()]);
+  render();
+  document.getElementById("buscar").addEventListener("input", render);
+  document.getElementById("filtroEstado").addEventListener("change", render);
+});
+
+async function cargarClientes() {
+  const resp = await fetch(`${API_URL}/clientes/`, {
+    headers: { "Authorization": "Bearer " + token }
+  });
+  clientes = await resp.json();
+}
+
+async function cargarPrestamos() {
+  const resp = await fetch(`${API_URL}/prestamos/`, {
+    headers: { "Authorization": "Bearer " + token }
+  });
+  prestamos = await resp.json();
+}
+
+async function cargarPagos() {
+  const resp = await fetch(`${API_URL}/pagos/`, {
+    headers: { "Authorization": "Bearer " + token }
+  });
+  pagos = await resp.json();
+}
+
+function render() {
+  const listado = document.getElementById("listaPagos");
+  listado.innerHTML = "";
+
+  const buscarTexto = document.getElementById("buscar").value.toLowerCase();
+  const estadoFiltro = document.getElementById("filtroEstado").value;
+
+  const filtrados = prestamos.filter(p => {
+    const c = clientes.find(cli => cli.id === p.cliente_id) || {};
+    const coincideTexto =
+      c.nombre?.toLowerCase().includes(buscarTexto) ||
+      c.cedula?.toLowerCase().includes(buscarTexto);
+    const coincideEstado = !estadoFiltro || p.estado === estadoFiltro;
+    return coincideTexto && coincideEstado;
+  });
+
+  if (filtrados.length === 0) {
+    listado.innerHTML = `<p class="text-center text-gray-600">No hay resultados</p>`;
+    return;
+  }
+
+  filtrados.forEach(prestamo => {
+    const cliente = clientes.find(c => c.id === prestamo.cliente_id) || {};
+    const pagosPrestamo = pagos.filter(p => p.prestamo_id === prestamo.id);
+    const total = prestamo.monto_inicial + prestamo.total_interes;
+    const porcentaje = ((prestamo.monto_pagado / total) * 100).toFixed(1);
+
+    const div = document.createElement("div");
+    div.className = "bg-white shadow-lg rounded-xl p-5";
+
+    div.innerHTML = `
+      <div class="flex justify-between items-center">
+        <h2 class="text-lg font-bold">${cliente.nombre || "Cliente desconocido"}</h2>
+        <span class="px-3 py-1 text-white rounded-full text-xs
+          ${prestamo.estado === "Pagado" ? "bg-green-600" :
+            prestamo.estado === "Atrasado" ? "bg-red-600" :
+            "bg-blue-600"}">
+          ${prestamo.estado}
+        </span>
+      </div>
+
+      <p class="text-sm text-gray-500">Cédula: ${cliente.cedula || "-"}</p>
+      <p class="text-sm text-gray-500">Teléfono: ${cliente.telefono || "-"}</p>
+      
+      <div class="mt-3">
+        <p>Monto total: $${total.toLocaleString("es-CO")}</p>
+        <p>Pagado: $${prestamo.monto_pagado.toLocaleString("es-CO")}</p>
+        <p class="text-red-600 font-bold">Restante: $${prestamo.monto_restante.toLocaleString("es-CO")}</p>
+
+        <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+          <div class="h-2 rounded-full bg-green-500" style="width:${porcentaje}%"></div>
+        </div>
+        <p class="text-xs text-gray-500 mt-1">${porcentaje}% completado</p>
+      </div>
+
+      <button class="bg-blue-700 text-white px-4 py-2 rounded-lg mt-3"
+              onclick="abrirModal(${prestamo.id})">
+        Registrar Pago
+      </button>
+
+      <details class="mt-3">
+        <summary class="cursor-pointer font-semibold text-blue-700">Ver historial de pagos</summary>
+        <div class="mt-2">
+          ${pagosPrestamo.map(p => `
+            <p>💰 $${p.monto_pagado.toLocaleString("es-CO")} - ${p.fecha_pago}</p>
+          `).join("") || "<p>No hay pagos aún</p>"}
+        </div>
+      </details>
+    `;
+
+    listado.appendChild(div);
+  });
+}
+
+function abrirModal(id) {
+  prestamoActual = id;
+  document.getElementById("modalPago").classList.remove("hidden");
+}
+
+function cerrarModal() {
+  document.getElementById("modalPago").classList.add("hidden");
+}
+
+async function confirmarPago() {
+  const monto = parseFloat(document.getElementById("montoPago").value);
+  const fecha = document.getElementById("fechaPago").value;
+
+  const prestamo = prestamos.find(p => p.id === prestamoActual);
+  if (!monto || monto <= 0) return alert("Monto inválido");
+  if (!fecha) return alert("Selecciona fecha");
+  if (monto > prestamo.monto_restante) return alert("Monto excede saldo");
+
+  const body = {
+    cliente_id: prestamo.cliente_id,
+    prestamo_id: prestamo.id,
+    monto_pagado: monto,
+    fecha_pago: fecha,
+    estado: "Completado"
+  };
+
+  const resp = await fetch(`${API_URL}/pagos/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+    body: JSON.stringify(body)
+  });
+
+  if (!resp.ok) {
+    const error = await resp.json();
+    alert(error.detail);
+    return;
+  }
+
+  cerrarModal();
+  await cargarPrestamos();
+  await cargarPagos();
+  render();
+  alert("✅ Pago registrado con éxito");
+}
+</script>
+</body>
+</html>
