@@ -79,6 +79,7 @@ async function cargarPrestamos() {
   prestamos = await resp.json();
 }
 
+
 async function cargarPagos() {
   const resp = await fetch(`${API_URL}/pagos/`, {
     headers: { "Authorization": "Bearer " + token }
@@ -185,6 +186,8 @@ async function confirmarPago() {
     fecha_pago: fecha,
     estado: "Completado"
   };
+  
+  console.log("🚀 Enviando pago...");
 
   const resp = await fetch(`${API_URL}/pagos/`, {
     method: "POST",
@@ -192,11 +195,12 @@ async function confirmarPago() {
     body: JSON.stringify(body)
   });
 
-  if (!resp.ok) {
-    const error = await resp.json();
-    alert(error.detail);
-    return;
-  }
+ if (!resp.ok) {
+  const raw = await resp.text();
+  console.log("❌ Error /pagos/:", resp.status, raw);
+  alert("❌ Error registrando pago. Mira consola (F12).");
+  return;
+}
 
   cerrarModal();
   await cargarPrestamos();
