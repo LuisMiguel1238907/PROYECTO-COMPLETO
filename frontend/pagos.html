@@ -65,6 +65,18 @@
             <select id="prestamoSelect" class="w-full p-2 border rounded"></select>
           </div>
 
+          <!-- ✅ RESUMEN DEL PRÉSTAMO SELECCIONADO -->
+          <div id="resumenPrestamo" class="col-span-2 bg-gray-50 border rounded p-4 hidden">
+            <p><b>Total:</b> <span id="rTotal"></span></p>
+            <p><b>Pagado:</b> <span id="rPagado"></span></p>
+            <p class="text-red-600"><b>Restante:</b> <span id="rRestante"></span></p>
+
+            <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+              <div id="rBarra" class="h-2 rounded-full bg-green-500" style="width:0%"></div>
+            </div>
+            <p class="text-xs text-gray-500 mt-1"><span id="rPorcentaje">0</span>% completado</p>
+          </div>
+
           <div>
             <label class="block text-gray-600 mb-1">Monto</label>
             <input type="number" id="monto" class="w-full p-2 border rounded">
@@ -155,6 +167,9 @@ async function cargarPrestamosPorCliente(id) {
     });
 
     const data = await res.json();
+
+    prestamosCliente = data; // ⭐ GUARDAMOS LOS PRESTAMOS
+
     const select = document.getElementById("prestamoSelect");
     select.innerHTML = '<option value="">Seleccione préstamo</option>';
 
@@ -164,6 +179,41 @@ async function cargarPrestamosPorCliente(id) {
         op.textContent = `#${p.id} - $${(p.monto_inicial + p.total_interes).toLocaleString()}`;
         select.appendChild(op);
     });
+
+    select.addEventListener("change", mostrarResumenPrestamo); // ⭐ NUEVO
+}
+
+function mostrarResumenPrestamo() {
+
+    const idPrestamo = parseInt(document.getElementById("prestamoSelect").value);
+    const box = document.getElementById("resumenPrestamo");
+
+    if (!idPrestamo) {
+        box.classList.add("hidden");
+        return;
+    }
+
+    const p = prestamosCliente.find(x => x.id === idPrestamo);
+
+    if (!p) {
+        box.classList.add("hidden");
+        return;
+    }
+
+    const total = p.monto_inicial + p.total_interes;
+    const pagado = p.monto_pagado || 0;
+    const restante = p.monto_restante;
+
+    const porcentaje = ((pagado / total) * 100).toFixed(1);
+
+    document.getElementById("rTotal").textContent = "$" + total.toLocaleString();
+    document.getElementById("rPagado").textContent = "$" + pagado.toLocaleString();
+    document.getElementById("rRestante").textContent = "$" + restante.toLocaleString();
+
+    document.getElementById("rPorcentaje").textContent = porcentaje;
+    document.getElementById("rBarra").style.width = porcentaje + "%";
+
+    box.classList.remove("hidden");
 }
 
 // ✅ Registrar pago real
