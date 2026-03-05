@@ -119,7 +119,6 @@ def listar_pagos(db: Session):
         .all()
     )
 
-
 # ✅ CREAR PAGO
 def crear_pago(db: Session, pago: schemas.PagoCreate):
 
@@ -137,10 +136,21 @@ def crear_pago(db: Session, pago: schemas.PagoCreate):
     if prestamo.estado == "Pagado":
         raise HTTPException(status_code=400, detail="Este préstamo ya está pagado")
 
-    if pago.monto_pagado > prestamo.monto_restante:
+    # 🔒 Asegura que el préstamo tenga valores válidos
+    total_prestamo = float(prestamo.monto_inicial + prestamo.total_interes)
+    if prestamo.monto_restante is None:
+        # si por algún motivo no estaba calculado, lo recalculamos
+        prestamo.monto_pagado = float(prestamo.monto_pagado or 0)
+        prestamo.monto_restante = round(total_prestamo - prestamo.monto_pagado, 2)
+
+    # ✅ Validación contra saldo (con redondeo para evitar errores por decimales)
+    saldo = round(float(prestamo.monto_restante), 2)
+    monto = round(float(pago.monto_pagado), 2)
+
+    if monto > saldo:
         raise HTTPException(
             status_code=400,
-            detail=f"El pago supera el saldo restante. Saldo: {prestamo.monto_restante}"
+            detail=f"El pago supera el saldo restante. Saldo: {saldo}"
         )
 
     fecha_pago = pago.fecha_pago or date.today()
@@ -148,29 +158,28 @@ def crear_pago(db: Session, pago: schemas.PagoCreate):
     nuevo_pago = Pago(
         cliente_id=pago.cliente_id,
         prestamo_id=pago.prestamo_id,
-        monto_pagado=pago.monto_pagado,
+        monto_pagado=monto,
         fecha_pago=fecha_pago,
-        estado=pago.estado,
+        estado=pago.estado,  # si quieres, puedes forzarlo a "Completado"/"Pagado"
     )
 
     db.add(nuevo_pago)
 
-    # ✅ actualizar préstamo
-    prestamo.monto_pagado += pago.monto_pagado
-    prestamo.monto_restante = (prestamo.monto_inicial + prestamo.total_interes) - prestamo.monto_pagado
+
+    # ✅ ACTUALIZAR PRESTAMO
+    prestamo.monto_pagado = round(float(prestamo.monto_pagado or 0) + monto, 2)
+    prestamo.monto_restante = round(total_prestamo - float(prestamo.monto_pagado), 2)
 
     if prestamo.monto_restante <= 0:
+        prestamo.monto_restante = 0.0
         prestamo.estado = "Pagado"
-    elif date.today() > prestamo.fecha_limite:
-        prestamo.estado = "Atrasado"
     else:
-        prestamo.estado = "Activo"
+        # si no manejas "Atrasado" aquí, déjalo como "Activo"
+        if prestamo.estado != "Atrasado":
+            prestamo.estado = "Activo"
 
     db.commit()
-
-    # ✅ Recargar con relaciones
     db.refresh(nuevo_pago)
     db.refresh(prestamo)
-    db.refresh(cliente)
 
     return nuevo_pago
