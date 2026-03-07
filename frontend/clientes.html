@@ -76,7 +76,7 @@
         <thead>
           <tr>
             <th>Nombre</th><th>Cédula</th><th>Teléfono</th><th>Correo</th>
-            <th>Dirección</th><th>Monto</th><th>Fecha</th><th>Estado</th><th>Acciones</th>
+            <th>Dirección</th><th>Fecha</th><th>Estado</th><th>Acciones</th>
           </tr>
         </thead>
         <tbody id="tablaClientes"></tbody>
@@ -93,7 +93,6 @@
       <input type="text" id="telefono" placeholder="Teléfono">
       <input type="email" id="correo" placeholder="Correo electrónico">
       <input type="text" id="direccion" placeholder="Dirección">
-      <input type="number" id="monto" placeholder="Monto del préstamo" required>
       <input type="date" id="fecha" required>
       <select id="estado">
         <option value="Activo">Activo</option>
@@ -151,7 +150,6 @@ async function cargarClientes() {
     <td>${cliente.telefono || "-"}</td>
     <td>${cliente.correo || "-"}</td>
     <td>${cliente.direccion || "-"}</td>
-    <td class="text-blue-600 font-bold">$${cliente.monto}</td>
     <td>${cliente.fecha}</td>
     <td>
       <span class="badge ${cliente.estado === "Activo" ? "activo" : "inactivo"}">
@@ -178,11 +176,10 @@ guardarCliente.onclick = async () => {
   const telefono = document.getElementById("telefono").value.trim();
   const correo = document.getElementById("correo").value.trim();
   const direccion = document.getElementById("direccion").value.trim();
-  const monto = parseFloat(document.getElementById("monto").value);
   const fecha = document.getElementById("fecha").value;
   const estado = document.getElementById("estado").value;
 
-  if (!nombre || !cedula || !monto || !fecha) {
+  if (!nombre || !cedula || !fecha) {
     alert("Completa los campos obligatorios");
     return;
   }
@@ -190,7 +187,7 @@ guardarCliente.onclick = async () => {
   // Datos en objeto para enviar
   const data = {
     nombre, cedula, telefono, correo, direccion,
-    monto, fecha, estado
+    fecha, estado
   };
 
   try {
@@ -228,8 +225,10 @@ guardarCliente.onclick = async () => {
       });
 
       if (!resp.ok) {
-        const err = await resp.json();
-        alert(err.detail || "Error guardando el cliente");
+        const err = await resp.json()
+        console.log("Error backend:", err)
+
+        alert(err.detail || err.message || JSON.stringify(err))
         return;
       }
     }
@@ -291,7 +290,6 @@ async function editarCliente(id) {
     document.getElementById("telefono").value = cliente.telefono;
     document.getElementById("correo").value = cliente.correo;
     document.getElementById("direccion").value = cliente.direccion;
-    document.getElementById("monto").value = cliente.monto;
     document.getElementById("fecha").value = cliente.fecha;
     document.getElementById("estado").value = cliente.estado;
 

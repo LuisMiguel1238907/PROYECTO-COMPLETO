@@ -11,7 +11,6 @@ class ClienteBase(BaseModel):
     telefono: Optional[str] = None
     correo: Optional[str] = None
     direccion: Optional[str] = None
-    monto: float
     fecha: Optional[date] = None
     estado: Optional[str] = "Activo"
 

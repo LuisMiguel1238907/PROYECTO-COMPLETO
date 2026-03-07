@@ -12,10 +12,8 @@ class Cliente(Base):
     telefono = Column(String(20))
     correo = Column(String(100))
     direccion = Column(String(150))
-    monto = Column(Float, nullable=False)
     fecha = Column(Date, nullable=True)
     estado = Column(String(50), default="Activo")
-
     prestamos = relationship("Prestamo", back_populates="cliente", cascade="all, delete-orphan")
     pagos = relationship("Pago", back_populates="cliente", cascade="all, delete-orphan")
 
