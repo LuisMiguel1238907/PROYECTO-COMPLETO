@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistema Financiero</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background: radial-gradient(circle at top left, #0f172a, #1e293b, #111827);
+      overflow: hidden;
+    }
+    .card {
+      background: linear-gradient(145deg, #1f2937, #0f172a);
+      border: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 0 25px rgba(0, 0, 0, 0.7);
+      transition: all 0.4s ease;
+    }
+    .input-field {
+      background-color: rgba(17, 24, 39, 0.9);
+      color: #f9fafb;
+      border: 1px solid #374151;
+    }
+    .input-field::placeholder {
+      color: #9ca3af;
+    }
+    .glow-btn {
+      background: linear-gradient(to right, #2563eb, #1e40af);
+      box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+      transition: all 0.3s ease;
+    }
+    .glow-btn:hover {
+      background: linear-gradient(to right, #1d4ed8, #1e3a8a);
+      transform: translateY(-1px);
+    }
+ 
+    /* ========================= 
+       TOASTS PERSONALIZADOS
+    ========================= */
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+ 
+    .toast {
+      min-width: 280px;
+      max-width: 380px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      color: white;
+      font-weight: 500;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      animation: slideInToast 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+ 
+    .toast-success { background: linear-gradient(135deg, #10b981, #059669); }
+    .toast-error   { background: linear-gradient(135deg, #ef4444, #dc2626); }
+    .toast-warning { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .toast-info    { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+ 
+    .toast-icon    { font-size: 1.2rem; line-height: 1.2; }
+    .toast-content { flex: 1; font-size: 0.95rem; line-height: 1.35; }
+ 
+    .toast-close {
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 1.1rem;
+      cursor: pointer;
+      opacity: 0.85;
+    }
+    .toast-close:hover { opacity: 1; }
+ 
+    .toast-progress {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.45);
+      animation: toastProgress linear forwards;
+    }
+ 
+    @keyframes slideInToast {
+      from { opacity: 0; transform: translateX(40px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+ 
+    @keyframes toastProgress {
+      from { width: 100%; }
+      to   { width: 0%; }
+    }
+  </style>
+</head>
+ 
+<body class="flex items-center justify-center min-h-screen text-gray-100">
+ 
+  <!-- ========================= 
+       PANTALLA DE INICIO DE SESIÓN
+  ========================= -->
+  <div id="loginCard" class="card rounded-2xl p-10 md:p-12 w-full max-w-md text-center">
+    <div class="mb-8">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"
+          class="w-14 h-14 text-blue-500 mx-auto">
+        <path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0v3.75a2.25 2.25 0 0 0 1.5 2.166V21a2.25 2.25 0 0 1-2.25 2.25h-9A2.25 2.25 0 0 1 2.25 21v-8.084a2.25 2.25 0 0 0 1.5-2.166V6ZM14.25 9v-.75a2.25 2.25 0 1 0-4.5 0V9h4.5Z" clip-rule="evenodd" />
+      </svg>
+    </div>
+ 
+    <h1 class="text-3xl font-extrabold text-white mb-2 tracking-tight">Iniciar Sesión</h1>
+    <p class="text-gray-400 mb-8">Accede al panel de control de tu sistema de préstamos.</p>
+ 
+    <form id="loginForm" class="space-y-6 text-left">
+      <div class="relative">
+        <input id="loginEmail" name="email" type="email" required placeholder="Correo Electrónico"
+              class="input-field w-full px-4 py-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all">
+      </div>
+ 
+      <div class="relative">
+        <input id="loginPassword" name="password" type="password" required placeholder="Contraseña"
+              class="input-field w-full px-4 py-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all">
+      </div>
+ 
+      <div>
+        <button type="button" id="loginBtn"
+            class="glow-btn inline-block w-full px-8 py-3 text-white text-lg font-semibold rounded-lg transition duration-300 transform text-center">
+          INGRESAR
+        </button>
+      </div>
+ 
+      <div class="text-sm text-center space-y-2">
+        <a href="#" id="showRegisterLink" class="block text-blue-400 hover:text-blue-300 font-medium transition-all">
+          ¿No tienes cuenta? Regístrate aquí
+        </a>
+        <a href="olvidarcontra.html" class="block text-blue-400 hover:text-blue-300 font-medium transition-all">
+          ¿Olvidaste tu contraseña?
+        </a>
+      </div>
+    </form>
+  </div>
+ 
+  <!-- ========================= 
+       PANTALLA DE REGISTRO
+  ========================= -->
+  <div id="registerCard" class="card rounded-2xl p-10 md:p-12 w-full max-w-md text-center hidden">
+    <h1 class="text-3xl font-extrabold text-white mb-2 tracking-tight">Crear Cuenta</h1>
+    <p class="text-gray-400 mb-8">Regístrate para acceder al sistema de préstamos.</p>
+ 
+    <form id="registerForm" class="space-y-6 text-left">
+      <div class="relative">
+        <input id="registerName" name="name" type="text" required placeholder="Nombre Completo"
+              class="input-field w-full px-4 py-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all">
+      </div>
+ 
+      <div class="relative">
+        <input id="registerEmail" name="email" type="email" required placeholder="Correo Electrónico"
+              class="input-field w-full px-4 py-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all">
+      </div>
+ 
+      <div class="relative">
+        <input id="registerPassword" name="password" type="password" required placeholder="Contraseña"
+              class="input-field w-full px-4 py-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all">
+      </div>
+ 
+      <div class="relative">
+        <input id="registerConfirmPassword" name="confirmPassword" type="password" required placeholder="Confirmar Contraseña"
+              class="input-field w-full px-4 py-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all">
+      </div>
+ 
+      <div>
+        <button type="button" id="registerBtn"
+            class="glow-btn inline-block w-full px-8 py-3 text-white text-lg font-semibold rounded-lg transition duration-300 transform text-center">
+          REGISTRARME
+        </button>
+      </div>
+ 
+      <div class="text-sm text-center">
+        <a href="#" id="showLoginLink" class="text-blue-400 hover:text-blue-300 font-medium transition-all">
+          ¿Ya tienes una cuenta? Inicia sesión
+        </a>
+      </div>
+    </form>
+  </div>
+ 
+  <!-- Toast Container -->
+  <div id="toastContainer" class="toast-container"></div>
+ 
+  <script>
+    document.getElementById("showLoginLink").addEventListener("click", function (e) {
+    e.preventDefault(); // ✅ evita el scroll al inicio
+    document.getElementById("registerCard").classList.add("hidden");
+    document.getElementById("loginCard").classList.remove("hidden");
+    });
+    /* =========================
+       FUNCIÓN TOAST
+    ========================= */
+    function showToast(message, type = "success", duration = 3000) {
+      const container = document.getElementById("toastContainer");
+      if (!container) return;
+ 
+      const icons = { success: "✅", error: "❌", warning: "⚠️", info: "ℹ️" };
+ 
+      if (typeof message === "object") {
+        message = JSON.stringify(message);
+      }
+ 
+      const toast = document.createElement("div");
+      toast.className = `toast toast-${type}`;
+      toast.innerHTML = `
+        <div class="toast-icon">${icons[type] || "ℹ️"}</div>
+        <div class="toast-content">${message}</div>
+        <button class="toast-close">&times;</button>
+        <div class="toast-progress" style="animation-duration:${duration}ms;"></div>
+      `;
+ 
+      container.appendChild(toast);
+ 
+      const removeToast = () => {
+        toast.style.opacity = "0";
+        toast.style.transform = "translateX(30px)";
+        toast.style.transition = "all 0.2s ease";
+        setTimeout(() => toast.remove(), 200);
+      };
+ 
+      toast.querySelector(".toast-close").addEventListener("click", removeToast);
+      setTimeout(removeToast, duration);
+    }
+ 
+    /* =========================
+       CAMBIAR ENTRE PANTALLAS
+    ========================= */
+    document.getElementById("showRegisterLink").addEventListener("click", function () {
+      document.getElementById("loginCard").classList.add("hidden");
+      document.getElementById("registerCard").classList.remove("hidden");
+    });
+ 
+    document.getElementById("showLoginLink").addEventListener("click", function () {
+      document.getElementById("registerCard").classList.add("hidden");
+      document.getElementById("loginCard").classList.remove("hidden");
+    });
+ 
+    /* =========================
+       LÓGICA DE LOGIN
+    ========================= */
+    document.getElementById("loginBtn").addEventListener("click", async () => {
+      const email    = document.getElementById("loginEmail").value.trim();
+      const password = document.getElementById("loginPassword").value.trim();
+ 
+      // Validaciones
+      if (!email || !password) {
+        showToast("Por favor, completa todos los campos.", "warning");
+        return;
+      }
+ 
+      if (!/\S+@\S+\.\S+/.test(email)) {
+        showToast("Por favor ingresa un correo electrónico válido.", "error");
+        return;
+      }
+ 
+      try {
+        const response = await fetch("http://127.0.0.1:8000/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        });
+ 
+        if (!response.ok) {
+          const errorData = await response.json();
+          showToast(errorData.message || "Correo o contraseña incorrectos.", "error");
+          return;
+        }
+ 
+        const data = await response.json();
+ 
+    // ✅ Cubre ambos casos: token o access_token
+const tokenValue = data.token || data.access_token;
+
+if (tokenValue) {
+    localStorage.setItem("token", tokenValue);
+} else {
+    showToast("Error: no se recibió token del servidor.", "error");
+    return;
+}
+
+showToast("¡Bienvenido! Redirigiendo...", "success");
+setTimeout(() => {
+    window.location.href = "index3.html";
+}, 1500);
+ 
+      } catch (error) {
+        showToast("Hubo un error al conectar con el servidor.", "error");
+        console.error(error);
+      }
+    });
+ 
+    /* =========================
+       LÓGICA DE REGISTRO
+    ========================= */
+    document.getElementById("registerBtn").addEventListener("click", async () => {
+      const name            = document.getElementById("registerName").value.trim();
+      const email           = document.getElementById("registerEmail").value.trim();
+      const password        = document.getElementById("registerPassword").value.trim();
+      const confirmPassword = document.getElementById("registerConfirmPassword").value.trim();
+ 
+      // Validaciones
+      if (!name || !email || !password || !confirmPassword) {
+        showToast("Por favor, completa todos los campos.", "warning");
+        return;
+      }
+ 
+      if (!/\S+@\S+\.\S+/.test(email)) {
+        showToast("Por favor ingresa un correo electrónico válido.", "error");
+        return;
+      }
+ 
+      if (password !== confirmPassword) {
+        showToast("Las contraseñas no coinciden.", "error");
+        return;
+      }
+ 
+      try {
+        const response = await fetch("http://127.0.0.1:8000/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, email, password }),
+        });
+ 
+        if (!response.ok) {
+          const errorData = await response.json();
+          showToast(errorData.message || "Error al registrar la cuenta.", "error");
+          return;
+        }
+ 
+        showToast("¡Cuenta registrada exitosamente!", "success");
+        setTimeout(() => {
+          window.location.href = "index2.html";
+        }, 1500);
+ 
+      } catch (error) {
+        showToast("Hubo un error al conectar con el servidor.", "error");
+        console.error(error);
+      }
+    });
+  </script>
+ 
+</body>
+</html>

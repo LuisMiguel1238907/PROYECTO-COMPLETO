@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="es" style="background:#f3f4f6;">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Configuración - Sistema de Préstamos</title>
+
+  <script>
+    (() => {
+      const tema = localStorage.getItem("appTheme") || "claro";
+      const root = document.documentElement;
+
+      root.classList.remove("theme-claro", "theme-oscuro", "theme-azul");
+      root.classList.add(`theme-${tema}`);
+
+      if (tema === "oscuro") {
+        root.style.background = "#0f172a";
+      } else if (tema === "azul") {
+        root.style.background = "#dbeafe";
+      } else {
+        root.style.background = "#f3f4f6";
+      }
+    })();
+  </script>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    html, body {
+      margin: 0;
+      background: #f3f4f6;
+    }
+
+    body {
+      font-family: "Poppins", sans-serif;
+    }
+
+    .sidebar {
+      width: 16rem;
+      background: linear-gradient(180deg, #111827 0%, #1f2937 100%);
+      transition: all 0.3s ease;
+    }
+
+    .sidebar:hover {
+      box-shadow: 0 0 25px rgba(59, 130, 246, 0.28);
+    }
+
+    .nav-link {
+      display: block;
+      padding: 0.75rem 1rem;
+      border-radius: 0.75rem;
+      color: #d1d5db;
+      transition: all 0.2s ease;
+      font-weight: 500;
+      text-decoration: none;
+    }
+
+    .nav-link:hover {
+      background: #374151;
+      color: white;
+    }
+    .card-ganancias {
+  overflow: hidden;
+}
+
+    .valor-ganancias {
+      font-size: clamp(1.8rem, 2.5vw, 3rem);
+      font-weight: 700;
+      line-height: 1.1;
+      max-width: 100%;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+    .nav-link.active {
+      background: #2563eb;
+      color: white;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+    }
+
+    .card {
+      transition: all 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .setting-check {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.7rem;
+      color: #374151;
+      font-size: 0.95rem;
+    }
+
+    .modal-bg {
+      background: rgba(17, 24, 39, 0.65);
+    }
+
+    .modal-input {
+      width: 100%;
+      padding: 0.75rem 0.9rem;
+      margin-top: 0.35rem;
+      margin-bottom: 0.9rem;
+      border: 1px solid #d1d5db;
+      border-radius: 0.75rem;
+      outline: none;
+      transition: 0.2s;
+      background: white;
+    }
+
+    .modal-input:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+
+    .theme-btn.active-theme {
+      outline: 3px solid #2563eb;
+      outline-offset: 2px;
+    }
+
+    /* TEMA CLARO */
+    html.theme-claro body {
+      background: #f3f4f6;
+    }
+
+    /* TEMA OSCURO */
+    html.theme-oscuro body {
+      background: #0f172a;
+    }
+
+    html.theme-oscuro main h1,
+    html.theme-oscuro main h2,
+    html.theme-oscuro main h3,
+    html.theme-oscuro main strong,
+    html.theme-oscuro main label {
+      color: #f9fafb !important;
+    }
+
+    html.theme-oscuro main p,
+    html.theme-oscuro main span,
+    html.theme-oscuro main .text-gray-600,
+    html.theme-oscuro main .text-gray-700,
+    html.theme-oscuro main .text-gray-800,
+    html.theme-oscuro main .text-gray-500 {
+      color: #d1d5db !important;
+    }
+
+    html.theme-oscuro .card,
+    html.theme-oscuro .bg-white {
+      background: #111827 !important;
+      color: #f9fafb !important;
+    }
+
+    html.theme-oscuro .modal-input {
+      background: #1f2937;
+      color: white;
+      border-color: #374151;
+    }
+
+    html.theme-oscuro .modal-input::placeholder {
+      color: #9ca3af;
+    }
+
+    html.theme-oscuro .sidebar {
+      background: linear-gradient(180deg, #020617 0%, #111827 100%) !important;
+    }
+
+    /* TEMA AZUL */
+    html.theme-azul body {
+      background: #dbeafe;
+    }
+
+    html.theme-azul .card,
+    html.theme-azul .bg-white {
+      background: #eff6ff !important;
+    }
+
+    html.theme-azul .sidebar {
+      background: linear-gradient(180deg, #1d4ed8 0%, #1e3a8a 100%);
+    }
+    /* =========================
+   TOASTS PERSONALIZADOS
+========================= */
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.toast {
+  min-width: 280px;
+  max-width: 380px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  color: white;
+  font-weight: 500;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  animation: slideInToast 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.toast-success {
+  background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.toast-error {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.toast-warning {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.toast-info {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+
+.toast-icon {
+  font-size: 1.2rem;
+  line-height: 1.2;
+}
+
+.toast-content {
+  flex: 1;
+  font-size: 0.95rem;
+  line-height: 1.35;
+}
+
+.toast-close {
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 1.1rem;
+  cursor: pointer;
+  opacity: 0.85;
+}
+
+.toast-close:hover {
+  opacity: 1;
+}
+
+.toast-progress {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.45);
+  animation: toastProgress linear forwards;
+}
+
+@keyframes slideInToast {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes toastProgress {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
+  </style>
+</head>
+
+<body class="font-sans antialiased">
+  <div class="flex">
+    <!-- SIDEBAR -->
+    <aside class="sidebar fixed h-screen text-white p-6 shadow-xl">
+      <h1 class="text-2xl font-bold mb-10 border-b border-gray-700 pb-3 text-center text-blue-400">
+        💼 Mi Sistema
+      </h1>
+
+      <nav>
+        <ul class="space-y-2">
+          <li><a href="index3.html" class="nav-link">🏠 Dashboard</a></li>
+          <li><a href="clientes.html" class="nav-link">👥 Clientes</a></li>
+          <li><a href="prestamos.html" class="nav-link">💰 Préstamos</a></li>
+          <li><a href="pagos.html" class="nav-link">💳 Pagos</a></li>
+          <li><a href="reportes.html" class="nav-link">📊 Reportes</a></li>
+          <li><a href="configuracion.html" class="nav-link active">⚙️ Configuración</a></li>
+        </ul>
+      </nav>
+
+      <div class="mt-8">
+        <button onclick="logout()" class="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-3 rounded-xl transition">
+          Cerrar sesión
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="ml-64 flex-1 min-h-screen p-8">
+      <header class="flex justify-between items-center mb-10">
+        <div>
+          <h1 class="text-4xl font-bold text-gray-800 mb-2">Centro de Configuración</h1>
+          <p class="text-gray-600 text-lg">Personaliza y gestiona tu sistema de préstamos ⚙️</p>
+        </div>
+
+        <div class="flex items-center gap-4">
+          <span id="usuarioNombre" class="text-gray-700 font-medium">Cargando...</span>
+          <img
+            src="https://cdn-icons-png.flaticon.com/512/1077/1077012.png"
+            class="w-10 h-10 rounded-full border-2 border-blue-400 shadow"
+            alt="perfil"
+          >
+        </div>
+      </header>
+
+      <!-- CONTENIDO -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+  <!-- PERFIL -->
+  <div class="bg-white rounded-2xl shadow p-6 card border-l-4 border-blue-500">
+    <h2 class="text-xl font-bold mb-4 text-gray-800">Perfil del Administrador</h2>
+    <div class="flex items-center gap-4">
+      <img id="profile-pic" src="https://cdn-icons-png.flaticon.com/512/1077/1077012.png" class="w-16 h-16 rounded-full border border-gray-200" />
+      <div class="text-sm text-gray-700">
+        <p><strong>Nombre:</strong> <span id="admin-name">Cargando...</span></p>
+        <p><strong>Email:</strong> <span id="admin-email">Cargando...</span></p>
+        <p><strong>Rol:</strong> Administrador</p>
+      </div>
+    </div>
+    <label for="file-input" class="mt-5 inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-semibold transition cursor-pointer">
+      Elegir archivo
+    </label>
+    <input type="file" id="file-input" style="position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;" accept=".jpg,.jpeg,.png,.gif,.webp,.bmp" onchange="updateProfilePic()" />
+    <button onclick="openEditProfileModal()" class="mt-5 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-semibold transition">
+      Editar Perfil
+    </button>
+  </div>
+
+  <!-- APARIENCIA -->
+  <div class="bg-white rounded-2xl shadow p-6 card border-l-4 border-green-500">
+    <h2 class="text-xl font-bold mb-4 text-gray-800">Apariencia</h2>
+    <p class="text-gray-600 text-sm mb-3">Elige un tema y se aplicará al instante.</p>
+    <div class="flex gap-3 mt-2">
+      <button type="button" data-theme="claro" class="theme-btn w-10 h-10 bg-white border-2 border-gray-300 rounded-xl cursor-pointer shadow-sm" title="Tema claro"></button>
+      <button type="button" data-theme="oscuro" class="theme-btn w-10 h-10 bg-gray-800 border-2 border-transparent rounded-xl cursor-pointer" title="Tema oscuro"></button>
+      <button type="button" data-theme="azul" class="theme-btn w-10 h-10 bg-blue-500 border-2 border-transparent rounded-xl cursor-pointer" title="Tema azul"></button>
+    </div>
+    <p class="text-xs text-gray-500 mt-4">El tema seleccionado quedará guardado automáticamente.</p>
+  </div>
+
+  <!-- SEGURIDAD -->
+  <div class="bg-white rounded-2xl shadow p-6 card border-l-4 border-red-500">
+    <h2 class="text-xl font-bold mb-4 text-gray-800">Seguridad</h2>
+    <label class="setting-check">
+      <input type="checkbox" id="two-factor" checked>
+      Autenticación en dos pasos
+    </label>
+    <label class="setting-check">
+      <input type="checkbox" id="remember-session">
+      Recordar sesión
+    </label>
+    <label class="setting-check">
+      <input type="checkbox" id="auto-lock">
+      Bloqueo automático
+    </label>
+    <button onclick="saveSecuritySettings()" class="mt-4 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-xl font-semibold transition">
+      Guardar Cambios
+    </button>
+  </div>
+
+  <!-- NOTIFICACIONES -->
+  <div class="bg-white rounded-2xl shadow p-6 card border-l-4 border-yellow-500">
+    <h2 class="text-xl font-bold mb-4 text-gray-800">Notificaciones</h2>
+    <label class="setting-check">
+      <input type="checkbox" id="noti-pagos-vencidos" checked>
+      Avisos de pagos vencidos
+    </label>
+    <label class="setting-check">
+      <input type="checkbox" id="noti-prestamos-aprobados" checked>
+      Nuevos préstamos aprobados
+    </label>
+    <label class="setting-check">
+      <input type="checkbox" id="noti-resumenes">
+      Resúmenes diarios
+    </label>
+    <label class="setting-check">
+      <input type="checkbox" id="noti-seguridad">
+      Alertas de seguridad
+    </label>
+    <button onclick="saveNotificationSettings()" class="mt-4 bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-xl font-semibold transition">
+      Actualizar Preferencias
+    </button>
+  </div>
+
+  <!-- BASE DE DATOS -->
+  <div class="bg-white rounded-2xl shadow p-6 card border-l-4 border-purple-500">
+    <h2 class="text-xl font-bold mb-4 text-gray-800">Base de Datos</h2>
+    <p class="text-gray-600 text-sm mb-4">Administra copias y exportaciones del sistema.</p>
+    <div class="flex flex-col gap-3">
+      <button class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-3 rounded-xl font-semibold transition">📦 Crear Backup</button>
+      <button class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-3 rounded-xl font-semibold transition">♻️ Restaurar</button>
+      <button class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-3 rounded-xl font-semibold transition">📤 Exportar</button>
+    </div>
+  </div>
+
+  <!-- SOPORTE -->
+  <div class="bg-white rounded-2xl shadow p-6 card border-l-4 border-cyan-500">
+    <h2 class="text-xl font-bold mb-4 text-gray-800">Soporte Técnico</h2>
+    <p class="text-gray-600 mb-2">¿Necesitas ayuda? Contáctanos.</p>
+    <p class="text-gray-700"><strong>Tel:</strong> +1 800 555 1234</p>
+    <p class="text-gray-700"><strong>Email:</strong> soporte@prestamopro.com</p>
+    <button class="bg-cyan-500 hover:bg-cyan-600 text-white px-4 py-2 rounded-xl font-semibold transition mt-4">
+      📩 Contactar Soporte
+    </button>
+  </div>
+
+</div><!-- fin grid -->
+
+      <footer class="text-center text-gray-500 text-sm mt-10 mb-4">
+        © 2025 Sistema de Préstamos — Desarrollado por el grupo 💻
+      </footer>
+    </main>
+  </div>
+
+  <!-- MODAL -->
+  <div id="editProfileModal" class="hidden fixed inset-0 modal-bg justify-center items-center z-50">
+    <div class="bg-white p-6 rounded-2xl shadow-xl w-full max-w-md mx-4">
+      <div class="flex justify-between items-center mb-4">
+        <h3 class="text-xl font-bold text-gray-800">Editar Perfil</h3>
+        <button onclick="closeEditProfileModal()" class="text-gray-400 hover:text-red-500 text-2xl leading-none">&times;</button>
+      </div>
+
+      <label class="text-sm font-medium text-gray-700">Nombre</label>
+      <input id="edit-name" class="modal-input" />
+
+      <label class="text-sm font-medium text-gray-700">Email</label>
+      <input id="edit-email" class="modal-input" />
+
+      <label class="text-sm font-medium text-gray-700">Contraseña</label>
+      <input id="edit-password" type="password" class="modal-input" placeholder="Nueva contraseña" />
+
+      <div class="flex justify-end gap-3 mt-4">
+        <button onclick="closeEditProfileModal()" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-xl font-semibold transition">
+          Cancelar
+        </button>
+        <button onclick="saveProfile()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition">
+          Guardar
+        </button>
+      </div>
+    </div>
+  </div>
+<div id="toastContainer" class="toast-container"></div>
+<script>
+  function showToast(message, type = "success", duration = 3000) {
+    const container = document.getElementById("toastContainer");
+
+    const icons = {
+      success: "✅",
+      error: "❌",
+      warning: "⚠️",
+      info: "ℹ️"
+    };
+
+    const toast = document.createElement("div");
+    toast.className = `toast toast-${type}`;
+    toast.innerHTML = `
+      <div class="toast-icon">${icons[type] || "ℹ️"}</div>
+      <div class="toast-content">${message}</div>
+      <button class="toast-close">&times;</button>
+      <div class="toast-progress" style="animation-duration:${duration}ms;"></div>
+    `;
+
+    container.appendChild(toast);
+
+    const removeToast = () => {
+      toast.style.opacity = "0";
+      toast.style.transform = "translateX(30px)";
+      toast.style.transition = "all 0.2s ease";
+      setTimeout(() => toast.remove(), 200);
+    };
+
+    toast.querySelector(".toast-close").addEventListener("click", removeToast);
+    setTimeout(removeToast, duration);
+  }
+
+  const API_URL = "http://127.0.0.1:8000";
+  const token = localStorage.getItem("token");
+ 
+  if (!token) {
+    showToast("Sesión expirada. Inicia sesión nuevamente.", "warning", 1800);
+    setTimeout(() => {
+      window.location.href = "index2.html";
+    }, 1200);
+  }
+
+  async function loadUser() {
+    try {
+      const resp = await fetch(`${API_URL}/auth/me`, {
+        headers: { Authorization: "Bearer " + token },
+      });
+
+      if (!resp.ok) return;
+
+      const data = await resp.json();
+      document.getElementById("admin-name").textContent = data.nombre;
+      document.getElementById("admin-email").textContent = data.email;
+      document.getElementById("usuarioNombre").textContent = data.nombre;
+
+      document.getElementById("edit-name").value = data.nombre;
+      document.getElementById("edit-email").value = data.email;
+    } catch (e) {
+      console.log("Error:", e);
+    }
+  }
+
+  async function saveProfile() {
+    const nombre = document.getElementById("edit-name").value.trim();
+    const email = document.getElementById("edit-email").value.trim();
+    const password = document.getElementById("edit-password").value;
+
+    try {
+      const resp = await fetch(`${API_URL}/auth/update`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token,
+        },
+        body: JSON.stringify({ nombre, email, password }),
+      });
+
+      if (resp.ok) {
+        showToast("Perfil actualizado", "success");
+        closeEditProfileModal();
+        document.getElementById("edit-password").value = "";
+        loadUser();
+      } else {
+        showToast("Error al actualizar", "error");
+      }
+    } catch (e) {
+      showToast("Error conectando con el servidor", "error");
+    }
+  }
+
+  function openEditProfileModal() {
+    const modal = document.getElementById("editProfileModal");
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+  }
+
+  function closeEditProfileModal() {
+    const modal = document.getElementById("editProfileModal");
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+  }
+
+  function saveSecuritySettings() {
+    const security = {
+      twoFactor: document.getElementById("two-factor").checked,
+      rememberSession: document.getElementById("remember-session").checked,
+      autoLock: document.getElementById("auto-lock").checked,
+    };
+
+    localStorage.setItem("securitySettings", JSON.stringify(security));
+    showToast("Configuración de seguridad guardada", "success");
+  }
+
+  function saveNotificationSettings() {
+    const notifications = {
+      pagosVencidos: document.getElementById("noti-pagos-vencidos").checked,
+      prestamosAprobados: document.getElementById("noti-prestamos-aprobados").checked,
+      resumenes: document.getElementById("noti-resumenes").checked,
+      seguridad: document.getElementById("noti-seguridad").checked,
+    };
+
+    localStorage.setItem("notificationSettings", JSON.stringify(notifications));
+    showToast("Preferencias de notificación guardadas", "success");
+  }
+
+  function loadLocalSettings() {
+    const security = JSON.parse(localStorage.getItem("securitySettings") || "{}");
+    const notifications = JSON.parse(localStorage.getItem("notificationSettings") || "{}");
+
+    if (typeof security.twoFactor === "boolean") {
+      document.getElementById("two-factor").checked = security.twoFactor;
+    }
+    if (typeof security.rememberSession === "boolean") {
+      document.getElementById("remember-session").checked = security.rememberSession;
+    }
+    if (typeof security.autoLock === "boolean") {
+      document.getElementById("auto-lock").checked = security.autoLock;
+    }
+
+    if (typeof notifications.pagosVencidos === "boolean") {
+      document.getElementById("noti-pagos-vencidos").checked = notifications.pagosVencidos;
+    }
+    if (typeof notifications.prestamosAprobados === "boolean") {
+      document.getElementById("noti-prestamos-aprobados").checked = notifications.prestamosAprobados;
+    }
+    if (typeof notifications.resumenes === "boolean") {
+      document.getElementById("noti-resumenes").checked = notifications.resumenes;
+    }
+    if (typeof notifications.seguridad === "boolean") {
+      document.getElementById("noti-seguridad").checked = notifications.seguridad;
+    }
+  }
+
+  function applyTheme(theme) {
+    const root = document.documentElement;
+
+    root.classList.remove("theme-claro", "theme-oscuro", "theme-azul");
+    root.classList.add(`theme-${theme}`);
+    localStorage.setItem("appTheme", theme);
+
+    if (theme === "oscuro") {
+      root.style.background = "#0f172a";
+    } else if (theme === "azul") {
+      root.style.background = "#dbeafe";
+    } else {
+      root.style.background = "#f3f4f6";
+    }
+
+    updateThemeButtons(theme);
+  }
+
+  function updateThemeButtons(activeTheme) {
+    document.querySelectorAll(".theme-btn").forEach(btn => {
+      btn.classList.remove("active-theme");
+      if (btn.dataset.theme === activeTheme) {
+        btn.classList.add("active-theme");
+      }
+    });
+  }
+
+  function initTheme() {
+    const savedTheme = localStorage.getItem("appTheme") || "claro";
+    applyTheme(savedTheme);
+
+    document.querySelectorAll(".theme-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        applyTheme(btn.dataset.theme);
+      });
+    });
+  }
+
+  function logout() {
+    localStorage.removeItem("token");
+    window.location.href = "index2.html";
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    loadUser();
+    loadLocalSettings();
+    initTheme();
+  });
+   function applyProfilePic(src) {
+    const profilePic = document.getElementById('profile-pic');
+    if (profilePic) profilePic.src = src;
+    const headerPic = document.querySelector('header img[alt="perfil"]');
+    if (headerPic) headerPic.src = src;
+  }
+
+  function updateProfilePic() {
+    const fileInput = document.getElementById('file-input');
+    if (!fileInput || !fileInput.files || fileInput.files.length === 0) return;
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      applyProfilePic(e.target.result);
+      try { localStorage.setItem('profilePic', e.target.result); } catch(ex) {}
+      showToast("¡Imagen cargada y guardada con éxito!", "success");
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // Al cargar la página restaurar la foto
+  document.addEventListener("DOMContentLoaded", function() {
+    const savedPic = localStorage.getItem('profilePic');
+    if (savedPic) applyProfilePic(savedPic);
+
+    const fileInput = document.getElementById('file-input');
+    if (fileInput) fileInput.addEventListener('change', updateProfilePic);
+  });
+
+  // Al cargar la página, verificar si hay una imagen guardada en localStorage
+  window.onload = function() {
+    const savedImage = localStorage.getItem('profilePic');
+    if (savedImage) {
+      document.getElementById('profile-pic').src = savedImage;  // Establecer la imagen guardada en el perfil
+    }
+  }
+
+
+</script>
+
+</body>
+</html> 

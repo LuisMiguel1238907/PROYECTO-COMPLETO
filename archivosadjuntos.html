@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Archivos Adjuntos - Gestión Financiera</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { 
+      background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%); 
+      font-family: 'Poppins', sans-serif; 
+      min-height: 100vh; 
+    }
+    .drop-zone { 
+      transition: all 0.3s ease; 
+      border: 3px dashed #d1d5db; 
+      border-radius: 1rem; 
+    }
+    .drop-zone.dragover { 
+      border-color: #3b82f6; 
+      background: #eff6ff; 
+      transform: scale(1.02); 
+    }
+    .file-item { 
+      transition: all 0.2s ease; 
+      background: #f9fafb; 
+      border-radius: 1rem; 
+      padding: 1rem; 
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05); 
+    }
+    .file-item:hover { 
+      background: #f1f5f9; 
+      transform: translateX(4px); 
+    }
+    .btn { 
+      font-weight: 600; 
+      padding: 0.5rem 1rem; 
+      border-radius: 0.75rem; 
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+      transition: all 0.2s ease; 
+      display: inline-flex; 
+      align-items: center; 
+      gap: 0.5rem; 
+      font-size: 0.875rem; 
+    }
+    .btn-download { 
+      background: #2563eb; 
+      color: white; 
+    }
+    .btn-download:hover { 
+      background: #1d4ed8; 
+      transform: scale(1.05); 
+    }
+    .btn-delete { 
+      background: #dc2626; 
+      color: white; 
+    }
+    .btn-delete:hover { 
+      background: #b91c1c; 
+      transform: scale(1.05); 
+    }
+    .preview-img { 
+      max-height: 60px; 
+      border-radius: 0.5rem; 
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1); 
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-6">
+
+  <!-- CONTENEDOR PRINCIPAL -->
+  <div class="w-full max-w-5xl bg-white rounded-3xl shadow-2xl p-8 border-t-8 border-blue-600">
+
+    <!-- HEADER + VOLVER -->
+    <div class="flex items-center justify-between mb-8">
+      <a href="clientes.html" class="flex items-center gap-2 text-blue-600 hover:text-blue-800 font-bold transition group">
+        <svg class="w-6 h-6 group-hover:-translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.75 19.5L8.25 12l7.5-7.5" />
+        </svg>
+        Volver al clientes
+      </a>
+      <h1 class="text-3xl font-extrabold text-gray-800 tracking-tight flex items-center gap-3">
+        Archivos Adjuntos
+      </h1>
+    </div>
+
+    <!-- ÁREA DE SUBIDA -->
+    <div id="dropZone" class="drop-zone rounded-2xl p-10 text-center cursor-pointer mb-10">
+      <svg class="w-16 h-16 text-blue-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+          d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M3 16.5l7.5-7.5m0 0L18 16.5M10.5 9V3" />
+      </svg>
+      <p class="text-lg font-semibold text-gray-700 mb-2">Arrastra archivos aquí o haz clic</p>
+      <label class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-3 rounded-xl shadow-lg cursor-pointer transition">
+        Seleccionar Archivos
+        <input type="file" multiple id="fileInput" class="hidden" accept=".pdf,.jpg,.jpeg,.png,.docx" />
+      </label>
+      <p class="text-sm text-gray-500 mt-3">PDF, JPG, PNG, DOCX | Máx. 10MB</p>
+    </div>
+
+    <!-- LISTA DE ARCHIVOS -->
+    <div>
+      <h2 class="text-2xl font-bold text-gray-800 mb-5 flex items-center gap-2">
+        <svg class="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+        Archivos Subidos
+      </h2>
+      <ul id="fileList" class="space-y-3"></ul>
+      <p id="emptyMessage" class="text-center text-gray-500 py-10 text-lg hidden">
+        No hay archivos subidos aún.
+      </p>
+    </div>
+  </div>
+
+  <script>
+    // === CONFIGURACIÓN ===
+    const KEY_ARCHIVOS = 'archivos_adjuntos';
+    const fileInput = document.getElementById('fileInput');
+    const dropZone = document.getElementById('dropZone');
+    const fileList = document.getElementById('fileList');
+    const emptyMessage = document.getElementById('emptyMessage');
+
+    let archivos = JSON.parse(localStorage.getItem(KEY_ARCHIVOS)) || [];
+
+    const FORMATOS_PERMITIDOS = ['pdf', 'jpg', 'jpeg', 'png', 'docx'];
+    const MAX_TAMAÑO = 10 * 1024 * 1024; // 10MB
+
+    // === CARGAR ARCHIVOS ===
+    function cargarArchivos() {
+      fileList.innerHTML = '';
+      if (archivos.length === 0) {
+        emptyMessage.classList.remove('hidden');
+        return;
+      }
+      emptyMessage.classList.add('hidden');
+
+      archivos.forEach((archivo, index) => {
+        const li = crearElementoArchivo(archivo, index);
+        fileList.appendChild(li);
+      });
+    }
+
+    // === CREAR ELEMENTO DE ARCHIVO ===
+    function crearElementoArchivo(archivo, index) {
+      const li = document.createElement('li');
+      li.className = 'file-item';
+
+      const ext = archivo.nombre.split('.').pop().toLowerCase();
+      const icono = getIconoArchivo(ext);
+
+      let vistaPrevia = '';
+      if (['jpg', 'jpeg', 'png'].includes(ext) && archivo.datos) {
+        vistaPrevia = `<img src="${archivo.datos}" alt="preview" class="preview-img mr-3">`;
+      } else if (ext === 'pdf' && archivo.datos) {
+        vistaPrevia = `<iframe src="${archivo.datos}" class="w-16 h-16 mr-3 border rounded" frameborder="0"></iframe>`;
+      }
+
+      li.innerHTML = `
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3 flex-1">
+            ${vistaPrevia}
+            <div>
+              ${icono}
+              <span class="font-semibold text-gray-800">${archivo.nombre}</span>
+              <p class="text-xs text-gray-500">${formatTamaño(archivo.tamaño)} • ${new Date(archivo.fecha).toLocaleDateString('es-DO')}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="descargarArchivo(${index})" class="btn btn-download">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+              </svg>
+              Descargar
+            </button>
+            <button onclick="eliminarArchivo(${index})" class="btn btn-delete">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2.25 2.25 0 0116.138 21H7.862a2.25 2.25 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+      `;
+      return li;
+    }
+
+    // === ÍCONO POR TIPO ===
+    function getIconoArchivo(ext) {
+      const iconos = {
+        pdf: `<svg class="w-6 h-6 text-red-600 inline-block mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
+        jpg: `<svg class="w-6 h-6 text-green-600 inline-block mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><circle cx="10" cy="13" r="2"/><path d="M19.5 10.5L16 14l-3-3-5 5"/></svg>`,
+        jpeg: `<svg class="w-6 h-6 text-green-600 inline-block mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><circle cx="10" cy="13" r="2"/><path d="M19.5 10.5L16 14l-3-3-5 5"/></svg>`,
+        png: `<svg class="w-6 h-6 text-green-600 inline-block mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><circle cx="10" cy="13" r="2"/><path d="M19.5 10.5L16 14l-3-3-5 5"/></svg>`,
+        docx: `<svg class="w-6 h-6 text-blue-600 inline-block mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 13h2v4H9zM13 13h2v4h-2z"/></svg>`
+      };
+      return iconos[ext] || `<svg class="w-6 h-6 text-gray-600 inline-block mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
+    }
+
+    // === FORMATEAR TAMAÑO ===
+    function formatTamaño(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
+    // === SUBIR ARCHIVOS ===
+    function subirArchivos(files) {
+      let nuevos = 0;
+      for (let file of files) {
+        const ext = file.name.split('.').pop().toLowerCase();
+        if (!FORMATOS_PERMITIDOS.includes(ext)) {
+          alert(`Formato no permitido: ${file.name}`);
+          continue;
+        }
+        if (file.size > MAX_TAMAÑO) {
+          alert(`Archivo demasiado grande: ${file.name}`);
+          continue;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const nuevoArchivo = {
+            nombre: file.name,
+            tamaño: file.size,
+            fecha: new Date().toISOString(),
+            datos: e.target.result
+          };
+          archivos.push(nuevoArchivo);
+          localStorage.setItem(KEY_ARCHIVOS, JSON.stringify(archivos));
+          cargarArchivos();
+          nuevos++;
+        };
+        reader.readAsDataURL(file);
+      }
+      if (nuevos > 0) {
+        mostrarNotificacion(`Se subieron ${nuevos} archivo(s)`);
+      }
+    }
+
+    // === DESCARGAR ===
+    window.descargarArchivo = function(index) {
+      const archivo = archivos[index];
+      const a = document.createElement('a');
+      a.href = archivo.datos;
+      a.download = archivo.nombre;
+      a.click();
+    };
+
+    // === ELIMINAR ===
+    window.eliminarArchivo = function(index) {
+      if (confirm(`¿Eliminar "${archivos[index].nombre}"?`)) {
+        archivos.splice(index, 1);
+        localStorage.setItem(KEY_ARCHIVOS, JSON.stringify(archivos));
+        cargarArchivos();
+        mostrarNotificacion('Archivo eliminado');
+      }
+    };
+
+    // === NOTIFICACIÓN ===
+    function mostrarNotificacion(mensaje) {
+      const notif = document.createElement('div');
+      notif.textContent = mensaje;
+      notif.className = 'fixed bottom-5 right-5 bg-green-600 text-white px-6 py-3 rounded-xl shadow-lg transform translate-y-20 opacity-0 transition-all duration-500 z-50';
+      document.body.appendChild(notif);
+      setTimeout(() => {
+        notif.classList.remove('translate-y-20', 'opacity-0');
+      }, 100);
+      setTimeout(() => {
+        notif.classList.add('translate-y-20', 'opacity-0');
+        setTimeout(() => notif.remove(), 500);
+      }, 3000);
+    }
+
+    // === DRAG & DROP ===
+    ['dragover', 'dragenter'].forEach(evt => {
+      dropZone.addEventListener(evt, e => {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+      });
+    });
+
+    ['dragleave', 'dragend', 'drop'].forEach(evt => {
+      dropZone.addEventListener(evt, e => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+      });
+    });
+
+    dropZone.addEventListener('drop', e => {
+      subirArchivos(e.dataTransfer.files);
+    });
+
+    dropZone.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', () => subirArchivos(fileInput.files));
+
+    // === INICIO ===
+    cargarArchivos();
+  </script>
+</body>
+</html>

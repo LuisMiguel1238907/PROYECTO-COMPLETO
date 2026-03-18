@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="es" style="background:#f3f4f6;">
+<head>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pagos - Sistema de Préstamos</title>
+
+  <script>
+    (() => {
+      const tema = localStorage.getItem("appTheme") || "claro";
+      const root = document.documentElement;
+
+      root.classList.remove("theme-claro", "theme-oscuro", "theme-azul");
+      root.classList.add(`theme-${tema}`);
+
+      if (tema === "oscuro") {
+        root.style.background = "#0f172a";
+      } else if (tema === "azul") {
+        root.style.background = "#dbeafe";
+      } else {
+        root.style.background = "#f3f4f6";
+      }
+    })();
+  </script>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    html, body {
+      margin: 0;
+      background: #f3f4f6;
+    }
+
+    .sidebar {
+      width: 16rem;
+      background: linear-gradient(180deg, #111827 0%, #1f2937 100%);
+      transition: all 0.3s ease;
+    }
+
+    .sidebar:hover {
+      box-shadow: 0 0 25px rgba(59, 130, 246, 0.28);
+    }
+
+    .nav-link {
+      display: block;
+      padding: 0.75rem 1rem;
+      border-radius: 0.75rem;
+      color: #d1d5db;
+      transition: all 0.2s ease;
+      font-weight: 500;
+      text-decoration: none;
+    }
+
+    .nav-link:hover {
+      background: #374151;
+      color: white;
+    }
+
+    .nav-link.active {
+      background: #2563eb;
+      color: white;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+    }
+
+    .card {
+      transition: all 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      min-width: 900px;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+
+    th {
+      background: #f9fafb;
+      color: #374151;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      font-weight: 600;
+      padding: 12px 8px;
+      border-bottom: 2px solid #e5e7eb;
+      text-align: left;
+    }
+
+    td {
+      padding: 10px 8px;
+      border-bottom: 1px solid #f3f4f6;
+      color: #111827;
+      font-size: 0.9rem;
+      vertical-align: middle;
+    }
+
+    tr:hover {
+      background: #f9fafb;
+    }
+
+    .badge {
+      padding: 4px 10px;
+      border-radius: 999px;
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 600;
+      display: inline-block;
+    }
+
+    .completado {
+      background: #10b981;
+    }
+
+    .pendiente {
+      background: #f59e0b;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.75rem 0.9rem;
+      border: 1px solid #d1d5db;
+      border-radius: 0.75rem;
+      outline: none;
+      transition: 0.2s;
+      background: white;
+    }
+
+    .form-control:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+
+    /* =========================
+       TEMAS GLOBALES
+    ========================= */
+
+    html.theme-claro body {
+      background: #f3f4f6;
+    }
+
+    html.theme-oscuro body {
+      background: #0f172a !important;
+    }
+
+    html.theme-oscuro main h1,
+    html.theme-oscuro main h2,
+    html.theme-oscuro main h3,
+    html.theme-oscuro main p,
+    html.theme-oscuro main span,
+    html.theme-oscuro main strong,
+    html.theme-oscuro main label,
+    html.theme-oscuro main th,
+    html.theme-oscuro main td,
+    html.theme-oscuro main b {
+      color: #f9fafb !important;
+    }
+
+    html.theme-oscuro .bg-white,
+    html.theme-oscuro .card {
+      background: #111827 !important;
+      color: #f9fafb !important;
+    }
+
+    html.theme-oscuro th {
+      background: #1f2937 !important;
+      border-bottom: 2px solid #374151 !important;
+    }
+
+    html.theme-oscuro td {
+      border-bottom: 1px solid #1f2937 !important;
+    }
+
+    html.theme-oscuro tr:hover {
+      background: #1f2937 !important;
+    }
+
+    html.theme-oscuro .form-control,
+    html.theme-oscuro select,
+    html.theme-oscuro input {
+      background: #1f2937 !important;
+      color: #f9fafb !important;
+      border-color: #374151 !important;
+    }
+
+    html.theme-oscuro input::placeholder {
+      color: #9ca3af !important;
+    }
+
+    html.theme-oscuro .sidebar {
+      background: linear-gradient(180deg, #020617 0%, #111827 100%) !important;
+    }
+
+    html.theme-oscuro #resumenPrestamo {
+      background: #1f2937 !important;
+      border-color: #374151 !important;
+    }
+
+    html.theme-oscuro .bg-gray-50 {
+      background: #1f2937 !important;
+    }
+
+    html.theme-oscuro .bg-gray-200 {
+      background: #374151 !important;
+    }
+
+    html.theme-azul body {
+      background: #dbeafe !important;
+    }
+
+    html.theme-azul .bg-white,
+    html.theme-azul .card {
+      background: #eff6ff !important;
+    }
+
+    html.theme-azul .sidebar {
+      background: linear-gradient(180deg, #1d4ed8 0%, #1e3a8a 100%) !important;
+    }
+    /* =========================
+   TOASTS PERSONALIZADOS
+========================= */
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.toast {
+  min-width: 280px;
+  max-width: 380px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  color: white;
+  font-weight: 500;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  animation: slideInToast 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.toast-success {
+  background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.toast-error {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.toast-warning {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.toast-info {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+
+.toast-icon {
+  font-size: 1.2rem;
+  line-height: 1.2;
+}
+
+.toast-content {
+  flex: 1;
+  font-size: 0.95rem;
+  line-height: 1.35;
+}
+
+.toast-close {
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 1.1rem;
+  cursor: pointer;
+  opacity: 0.85;
+}
+
+.toast-close:hover {
+  opacity: 1;
+}
+
+.toast-progress {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.45);
+  animation: toastProgress linear forwards;
+}
+
+@keyframes slideInToast {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes toastProgress {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
+
+.flatpickr-calendar {
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  color: #111827;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  padding: 8px;
+}
+.flatpickr-calendar.open { opacity: 1; transform: translateY(0); }
+.flatpickr-month { background-color: #ffffff !important; color: #111827 !important; }
+.flatpickr-current-month .cur-month { color: #111827 !important; font-size: 15px !important; font-weight: 500 !important; }
+.flatpickr-current-month input.cur-year { color: #9ca3af !important; font-size: 15px !important; font-weight: 400 !important; }
+.flatpickr-weekdays { background-color: #ffffff !important; }
+span.flatpickr-weekday { background-color: #ffffff !important; color: #6b7280 !important; font-size: 13px !important; font-weight: 500 !important; }
+.flatpickr-prev-month svg path, .flatpickr-next-month svg path { fill: #6b7280; }
+.flatpickr-prev-month:hover, .flatpickr-next-month:hover { background: transparent !important; }
+.flatpickr-prev-month:hover svg path, .flatpickr-next-month:hover svg path { fill: #111827; }
+.flatpickr-day { color: #111827; border-radius: 50% !important; border: none !important; }
+.flatpickr-day.prevMonthDay, .flatpickr-day.nextMonthDay { color: #d1d5db !important; }
+.flatpickr-day:hover { background-color: #f3f4f6 !important; color: #111827 !important; border: none !important; }
+.flatpickr-day.selected, .flatpickr-day.selected:hover { background-color: #10b981 !important; border-color: #10b981 !important; color: #ffffff !important; }
+.flatpickr-day.today { border: none !important; }
+.flatpickr-day.disabled, .flatpickr-day.disabled:hover { color: #d1d5db !important; background: transparent !important; }
+  </style>
+</head>
+
+<body class="font-sans antialiased">
+  <div class="flex">
+    <!-- SIDEBAR -->
+    <aside class="sidebar fixed h-screen text-white p-6 shadow-xl">
+      <h1 class="text-2xl font-bold mb-10 border-b border-gray-700 pb-3 text-center text-blue-400">
+        💼 Mi Sistema
+      </h1>
+
+      <nav>
+        <ul class="space-y-2">
+          <li><a href="index3.html" class="nav-link">🏠 Dashboard</a></li>
+          <li><a href="clientes.html" class="nav-link">👥 Clientes</a></li>
+          <li><a href="prestamos.html" class="nav-link">💰 Préstamos</a></li>
+          <li><a href="pagos.html" class="nav-link active">💳 Pagos</a></li>
+          <li><a href="reportes.html" class="nav-link">📊 Reportes</a></li>
+          <li><a href="configuracion.html" class="nav-link">⚙️ Configuración</a></li>
+        </ul>
+      </nav>
+
+      <div class="mt-8">
+        <button onclick="logout()" class="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-3 rounded-xl transition">
+          Cerrar sesión
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="ml-64 flex-1 min-h-screen p-8">
+      <header class="flex justify-between items-center mb-10">
+        <div>
+          <h1 class="text-4xl font-bold text-gray-800 mb-2">Gestión de Pagos</h1>
+          <p class="text-gray-600 text-lg">Registra y consulta los pagos realizados en el sistema 💳</p>
+        </div>
+
+        <div class="flex items-center gap-4">
+          <span id="usuarioNombre" class="text-gray-700 font-medium">Cargando...</span>
+          <img
+            src="https://cdn-icons-png.flaticon.com/512/1077/1077012.png"
+            class="w-10 h-10 rounded-full border-2 border-blue-400 shadow"
+            alt="perfil"
+          >
+        </div>
+      </header>
+
+      <!-- TARJETAS -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white p-6 rounded-2xl shadow card border-l-4 border-blue-500">
+          <h2 class="text-gray-600 text-sm font-semibold uppercase mb-2">Total Pagos Hoy</h2>
+          <p id="totalPagosHoy" class="text-3xl font-bold text-blue-600">$0</p>
+          <p class="text-gray-500 text-sm mt-1">Registrados hoy</p>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow card border-l-4 border-yellow-500">
+          <h2 class="text-gray-600 text-sm font-semibold uppercase mb-2">Pagos Pendientes</h2>
+          <p id="pagosPendientes" class="text-3xl font-bold text-yellow-500">0</p>
+          <p class="text-gray-500 text-sm mt-1">Por completar</p>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow card border-l-4 border-green-500">
+          <h2 class="text-gray-600 text-sm font-semibold uppercase mb-2">Pagos Completados</h2>
+          <p id="pagosCompletados" class="text-3xl font-bold text-green-600">0</p>
+          <p class="text-gray-500 text-sm mt-1">Finalizados</p>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow card border-l-4 border-indigo-500">
+          <h2 class="text-gray-600 text-sm font-semibold uppercase mb-2">Ingresos del Mes</h2>
+          <p id="ingresosMes" class="text-3xl font-bold text-indigo-600">$0</p>
+          <p class="text-gray-500 text-sm mt-1">Acumulados</p>
+        </div>
+      </div>
+
+      <!-- FORMULARIO -->
+      <div class="bg-white p-6 rounded-2xl shadow card mb-8">
+        <div class="mb-6">
+          <h2 class="text-xl font-semibold text-gray-700">💸 Registrar Nuevo Pago</h2>
+          <p class="text-gray-500 text-sm mt-1">Selecciona el cliente, el préstamo y registra el pago</p>
+        </div>
+
+        <form id="paymentForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Cliente</label>
+            <select id="clienteSelect" class="form-control" required>
+              <option value="">Seleccione</option>
+            </select>
+          </div>
+
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-2">Préstamo</label>
+            <select id="prestamoSelect" class="form-control" required>
+              <option value="">Seleccione préstamo</option>
+            </select>
+          </div>
+
+          <!-- RESUMEN PRESTAMO -->
+          <div id="resumenPrestamo" class="md:col-span-2 bg-gray-50 border border-gray-200 rounded-xl p-4 hidden">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <p><b>Total:</b> <span id="rTotal"></span></p>
+              <p><b>Pagado:</b> <span id="rPagado"></span></p>
+              <p class="text-red-600"><b>Restante:</b> <span id="rRestante"></span></p>
+            </div>
+
+            <div class="w-full bg-gray-200 rounded-full h-2 mt-3">
+              <div id="rBarra" class="h-2 rounded-full bg-green-500" style="width:0%"></div>
+            </div>
+            <p class="text-xs text-gray-500 mt-2"><span id="rPorcentaje">0</span>% completado</p>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Monto</label>
+            <input type="text" id="monto" class="form-control" placeholder="Monto del préstamo" required inputmode="numeric">
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Fecha</label>
+            <input type="text" id="fecha" class="form-control" placeholder="aaaa-mm-dd" required>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Estado</label>
+            <select id="estado" class="form-control">
+              <option value="Completado">Completado</option>
+              <option value="Pendiente">Pendiente</option>
+            </select>
+          </div>
+
+          <div class="md:col-span-2 flex justify-end">
+            <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-xl w-full md:w-auto font-semibold transition" type="submit">
+              Registrar Pago
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- TABLA -->
+      <div class="bg-white p-6 rounded-2xl shadow card">
+        <div class="mb-6">
+          <h2 class="text-xl font-semibold text-gray-700">📋 Historial de Pagos</h2>
+          <p class="text-gray-500 text-sm mt-1">Consulta todos los pagos registrados</p>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Cliente</th>
+                <th>Préstamo</th>
+                <th>Monto</th>
+                <th>Fecha</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody id="tablaPagos"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <footer class="text-center text-gray-500 text-sm mt-10 mb-4">
+        © 2025 Sistema de Préstamos — Desarrollado por el grupo 💻
+      </footer>
+    </main>
+  </div>
+<div id="toastContainer" class="toast-container"></div>
+<script>
+  function showToast(message, type = "success", duration = 3000) {
+    const container = document.getElementById("toastContainer");
+
+    const icons = {
+      success: "✅",
+      error: "❌",
+      warning: "⚠️",
+      info: "ℹ️"
+    };
+
+    const toast = document.createElement("div");
+    toast.className = `toast toast-${type}`;
+    toast.innerHTML = `
+      <div class="toast-icon">${icons[type] || "ℹ️"}</div>
+      <div class="toast-content">${message}</div>
+      <button class="toast-close">&times;</button>
+      <div class="toast-progress" style="animation-duration:${duration}ms;"></div>
+    `;
+
+    container.appendChild(toast);
+
+    const removeToast = () => {
+      toast.style.opacity = "0";
+      toast.style.transform = "translateX(30px)";
+      toast.style.transition = "all 0.2s ease";
+      setTimeout(() => toast.remove(), 200);
+    };
+
+    toast.querySelector(".toast-close").addEventListener("click", removeToast);
+    setTimeout(removeToast, duration);
+  }
+
+  const API = "http://127.0.0.1:8000";
+  const token = localStorage.getItem("token");
+  let prestamosCliente = [];
+
+  if (!token) {
+    showToast("Sesión expirada. Inicia sesión nuevamente.", "warning", 1800);
+    setTimeout(() => {
+      window.location.href = "index2.html";
+    }, 1200);
+  }
+
+  const clienteSelect = document.getElementById("clienteSelect");
+  const prestamoSelect = document.getElementById("prestamoSelect");
+  const montoInput = document.getElementById("monto");
+  const fechaInput = document.getElementById("fecha");
+  const estadoSelect = document.getElementById("estado");
+  const tablaPagos = document.getElementById("tablaPagos");
+
+  function aplicarTemaGuardado() {
+    const tema = localStorage.getItem("appTheme") || "claro";
+    const root = document.documentElement;
+
+    root.classList.remove("theme-claro", "theme-oscuro", "theme-azul");
+    root.classList.add(`theme-${tema}`);
+
+    if (tema === "oscuro") {
+      root.style.background = "#0f172a";
+    } else if (tema === "azul") {
+      root.style.background = "#dbeafe";
+    } else {
+      root.style.background = "#f3f4f6";
+    }
+  }
+
+  async function cargarUsuario() {
+    try {
+      const resp = await fetch(`${API}/auth/me`, {
+        headers: { "Authorization": "Bearer " + token }
+      });
+
+      if (resp.ok) {
+        const user = await resp.json();
+        document.getElementById("usuarioNombre").textContent = user.nombre;
+      } else {
+        document.getElementById("usuarioNombre").textContent = "Usuario";
+      }
+    } catch (e) {
+      console.log("Error cargando usuario", e);
+      document.getElementById("usuarioNombre").textContent = "Usuario";
+    }
+  }
+
+  function logout() {
+    localStorage.removeItem("token");
+    window.location.href = "index2.html";
+  }
+
+  async function cargarClientes() {
+    try {
+      const res = await fetch(`${API}/clientes`, {
+        headers: { "Authorization": "Bearer " + token }
+      });
+
+      const data = await res.json();
+      clienteSelect.innerHTML = '<option value="">Seleccione</option>';
+
+      data.forEach(c => {
+        const op = document.createElement("option");
+        op.value = c.id;
+        op.textContent = c.nombre;
+        clienteSelect.appendChild(op);
+      });
+    } catch (e) {
+      console.log("Error cargando clientes", e);
+    }
+  }
+
+  async function cargarPrestamosPorCliente(id) {
+    try {
+      if (!id) {
+        prestamoSelect.innerHTML = '<option value="">Seleccione préstamo</option>';
+        document.getElementById("resumenPrestamo").classList.add("hidden");
+        prestamosCliente = [];
+        return;
+      }
+
+      const res = await fetch(`${API}/prestamos/cliente/${id}`, {
+        headers: { "Authorization": "Bearer " + token }
+      });
+
+      const data = await res.json();
+      prestamosCliente = data;
+
+      prestamoSelect.innerHTML = '<option value="">Seleccione préstamo</option>';
+
+      data.forEach(p => {
+        const op = document.createElement("option");
+        op.value = p.id;
+        op.textContent = `#${p.id} - $${((p.monto_inicial || 0) + (p.total_interes || 0)).toLocaleString()}`;
+        prestamoSelect.appendChild(op);
+      });
+    } catch (e) {
+      console.log("Error cargando préstamos del cliente", e);
+    }
+  }
+
+  function mostrarResumenPrestamo() {
+    const idPrestamo = parseInt(prestamoSelect.value);
+    const box = document.getElementById("resumenPrestamo");
+
+    if (!idPrestamo) {
+      box.classList.add("hidden");
+      return;
+    }
+
+    const p = prestamosCliente.find(x => x.id === idPrestamo);
+
+    if (!p) {
+      box.classList.add("hidden");
+      return;
+    }
+
+    const total = (p.monto_inicial || 0) + (p.total_interes || 0);
+    const pagado = p.monto_pagado || 0;
+    const restante = p.monto_restante ?? Math.max(total - pagado, 0);
+    const porcentaje = total > 0 ? ((pagado / total) * 100).toFixed(1) : 0;
+
+    document.getElementById("rTotal").textContent = "$" + total.toLocaleString();
+    document.getElementById("rPagado").textContent = "$" + pagado.toLocaleString();
+    document.getElementById("rRestante").textContent = "$" + restante.toLocaleString();
+    document.getElementById("rPorcentaje").textContent = porcentaje;
+    document.getElementById("rBarra").style.width = porcentaje + "%";
+
+    box.classList.remove("hidden");
+  }
+
+  function claseEstadoPago(estado) {
+    return estado === "Completado" ? "completado" : "pendiente";
+  }
+
+  async function cargarPagos() {
+    try {
+      const res = await fetch(`${API}/pagos`, {
+        headers: { "Authorization": "Bearer " + token }
+      });
+
+      const pagos = await res.json();
+      tablaPagos.innerHTML = "";
+
+      let totalHoy = 0;
+      let pend = 0;
+      let comp = 0;
+      let ingresosMes = 0;
+
+      const hoy = new Date().toISOString().split("T")[0];
+      const fechaActual = new Date();
+
+      pagos.forEach(p => {
+        const monto = p.monto_pagado || 0;
+        const fecha = (p.fecha_pago || "").split("T")[0];
+
+        if (fecha === hoy) totalHoy += monto;
+        if (p.estado === "Pendiente") pend++;
+        if (p.estado === "Completado") comp++;
+
+        const fechaPago = new Date(p.fecha_pago);
+        if (
+          fechaPago.getMonth() === fechaActual.getMonth() &&
+          fechaPago.getFullYear() === fechaActual.getFullYear()
+        ) {
+          ingresosMes += monto;
+        }
+
+        const fila = document.createElement("tr");
+        fila.innerHTML = `
+          <td>${p.cliente ? p.cliente.nombre : "—"}</td>
+          <td>#${p.prestamo_id}</td>
+          <td class="text-blue-600 font-bold">$${monto.toLocaleString()}</td>
+          <td>${fecha || "—"}</td>
+          <td>
+            <span class="badge ${claseEstadoPago(p.estado)}">${p.estado}</span>
+          </td>
+        `;
+        tablaPagos.appendChild(fila);
+      });
+
+      document.getElementById("totalPagosHoy").textContent = "$" + totalHoy.toLocaleString();
+      document.getElementById("pagosPendientes").textContent = pend;
+      document.getElementById("pagosCompletados").textContent = comp;
+      document.getElementById("ingresosMes").textContent = "$" + ingresosMes.toLocaleString();
+    } catch (e) {
+      console.log("Error cargando pagos", e);
+      showToast("Error cargando pagos", "error");
+    }
+  }
+
+  document.getElementById("paymentForm").addEventListener("submit", async e => {
+    e.preventDefault();
+
+    const pago = {
+      cliente_id: parseInt(clienteSelect.value),
+      prestamo_id: parseInt(prestamoSelect.value),
+      monto_pagado: parseFloat(montoInput.value),
+      fecha_pago: fechaInput.value,
+      estado: estadoSelect.value
+    };
+
+    try {
+      const res = await fetch(`${API}/pagos`, {
+        method: "POST",
+        headers: {
+          "Authorization": "Bearer " + token,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(pago)
+      });
+
+      if (res.ok) {
+        showToast("Pago registrado", "success");
+        document.getElementById("paymentForm").reset();
+        document.getElementById("resumenPrestamo").classList.add("hidden");
+        prestamoSelect.innerHTML = '<option value="">Seleccione préstamo</option>';
+        await cargarPagos();
+      } else {
+        showToast("Error registrando pago", "error");
+      }
+    } catch (e) {
+      showToast("Error conectando con el servidor", "error");
+    }
+  });
+  
+
+  clienteSelect.addEventListener("change", e => {
+    cargarPrestamosPorCliente(e.target.value);
+  });
+
+  prestamoSelect.addEventListener("change", mostrarResumenPrestamo);
+
+  document.addEventListener("DOMContentLoaded", async () => {
+    aplicarTemaGuardado();
+    await cargarUsuario();
+    await cargarClientes();
+    await cargarPagos();
+    const savedPic = localStorage.getItem('profilePic');
+if (savedPic) {
+  const headerPic = document.querySelector('header img[alt="perfil"]');
+  if (headerPic) headerPic.src = savedPic;
+}
+  });
+
+flatpickr("#fecha", {
+  dateFormat: "Y-m-d",
+  minDate: "2020-01-01",
+  locale: {
+    firstDayOfWeek: 1,
+    weekdays: {
+      shorthand: ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"],
+      longhand: ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"],
+    },
+    months: {
+      shorthand: ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"],
+      longhand: ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"],
+    }
+  }
+  
+});
+// Auto-formato puntos de miles
+const montoInputPagos = document.getElementById("monto");
+montoInputPagos.addEventListener("input", function () {
+  let raw = this.value.replace(/[^0-9]/g, "");
+  let formatted = "";
+  let count = 0;
+  for (let i = raw.length - 1; i >= 0; i--) {
+    if (count > 0 && count % 3 === 0) {
+      formatted = "." + formatted;
+    }
+    formatted = raw[i] + formatted;
+    count++;
+  }
+  this.value = formatted;
+});
+
+
+</script>
+
+</body>
+</html>

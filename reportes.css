@@ -1,0 +1,180 @@
+html, body {
+  margin: 0;
+  background: #f3f4f6;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  color: #111827;
+}
+
+.sidebar {
+  width: 16rem;
+  background: linear-gradient(180deg, #111827 0%, #1f2937 100%);
+  transition: all 0.3s ease;
+}
+
+.sidebar:hover {
+  box-shadow: 0 0 25px rgba(59, 130, 246, 0.28);
+}
+
+.nav-link {
+  display: block;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  color: #d1d5db;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.nav-link:hover {
+  background: #374151;
+  color: white;
+}
+
+.nav-link.active {
+  background: #2563eb;
+  color: white;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+}
+
+.card {
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Opcionales para futuras tablas o secciones */
+.table-wrap {
+  overflow-x: auto;
+}
+
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 900px;
+  margin-top: 1rem;
+}
+
+.report-table th {
+  background: #f9fafb;
+  color: #374151;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  font-weight: 600;
+  padding: 12px 8px;
+  border-bottom: 2px solid #e5e7eb;
+  text-align: left;
+}
+
+.report-table td {
+  padding: 10px 8px;
+  border-bottom: 1px solid #f3f4f6;
+  color: #111827;
+  font-size: 0.9rem;
+  vertical-align: middle;
+}
+
+.report-table tr:hover {
+  background: #f9fafb;
+}
+
+.badge {
+  padding: 4px 10px;
+  border-radius: 999px;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.badge.completado {
+  background: #10b981;
+}
+
+.badge.activo {
+  background: #2563eb;
+}
+
+.badge.pendiente {
+  background: #f59e0b;
+}
+
+.badge.vencido {
+  background: #ef4444;
+}
+
+.empty {
+  text-align: center;
+  color: #6b7280;
+  padding: 1rem 0;
+}
+
+/* =========================
+   TEMAS GLOBALES
+========================= */
+
+html.theme-claro body {
+  background: #f3f4f6;
+}
+
+html.theme-oscuro body {
+  background: #0f172a !important;
+}
+
+html.theme-oscuro main h1,
+html.theme-oscuro main h2,
+html.theme-oscuro main h3,
+html.theme-oscuro main p,
+html.theme-oscuro main span,
+html.theme-oscuro main strong,
+html.theme-oscuro main label,
+html.theme-oscuro main th,
+html.theme-oscuro main td,
+html.theme-oscuro main b {
+  color: #f9fafb !important;
+}
+
+html.theme-oscuro .bg-white,
+html.theme-oscuro .card {
+  background: #111827 !important;
+  color: #f9fafb !important;
+}
+
+html.theme-oscuro .sidebar {
+  background: linear-gradient(180deg, #020617 0%, #111827 100%) !important;
+}
+
+html.theme-oscuro .report-table th,
+html.theme-oscuro th {
+  background: #1f2937 !important;
+  border-bottom: 2px solid #374151 !important;
+}
+
+html.theme-oscuro .report-table td,
+html.theme-oscuro td {
+  border-bottom: 1px solid #1f2937 !important;
+}
+
+html.theme-oscuro .report-table tr:hover,
+html.theme-oscuro tr:hover {
+  background: #1f2937 !important;
+}
+
+html.theme-azul body {
+  background: #dbeafe !important;
+}
+
+html.theme-azul .bg-white,
+html.theme-azul .card {
+  background: #eff6ff !important;
+}
+
+html.theme-azul .sidebar {
+  background: linear-gradient(180deg, #1d4ed8 0%, #1e3a8a 100%) !important;
+}

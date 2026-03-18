@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="es" style="background:#f3f4f6;">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <title>Préstamos - Sistema de Préstamos</title>
+
+  <script>
+    (() => {
+      const tema = localStorage.getItem("appTheme") || "claro";
+      const root = document.documentElement;
+
+      root.classList.remove("theme-claro", "theme-oscuro", "theme-azul");
+      root.classList.add(`theme-${tema}`);
+
+      if (tema === "oscuro") {
+        root.style.background = "#0f172a";
+      } else if (tema === "azul") {
+        root.style.background = "#dbeafe";
+      } else {
+        root.style.background = "#f3f4f6";
+      }
+    })();
+  </script>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    html, body {
+      margin: 0;
+      background: #f3f4f6;
+    }
+
+    .sidebar {
+      width: 16rem;
+      background: linear-gradient(180deg, #111827 0%, #1f2937 100%);
+      transition: all 0.3s ease;
+    }
+
+    .sidebar:hover {
+      box-shadow: 0 0 25px rgba(59, 130, 246, 0.28);
+    }
+
+    .nav-link {
+      display: block;
+      padding: 0.75rem 1rem;
+      border-radius: 0.75rem;
+      color: #d1d5db;
+      transition: all 0.2s ease;
+      font-weight: 500;
+      text-decoration: none;
+    }
+
+    .nav-link:hover {
+      background: #374151;
+      color: white;
+    }
+
+    .nav-link.active {
+      background: #2563eb;
+      color: white;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+    }
+
+    .card {
+      transition: all 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      min-width: 900px;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+
+    th {
+      background: #f9fafb;
+      color: #374151;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      font-weight: 600;
+      padding: 12px 8px;
+      border-bottom: 2px solid #e5e7eb;
+      text-align: left;
+    }
+
+    td {
+      padding: 10px 8px;
+      border-bottom: 1px solid #f3f4f6;
+      color: #111827;
+      font-size: 0.9rem;
+      vertical-align: middle;
+    }
+
+    tr:hover {
+      background: #f9fafb;
+    }
+
+    .badge {
+      padding: 4px 10px;
+      border-radius: 999px;
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 600;
+      display: inline-block;
+    }
+
+    .activo {
+      background: #10b981;
+    }
+
+    .pagado {
+      background: #2563eb;
+    }
+
+    .atrasado {
+      background: #ef4444;
+    }
+
+    .btn-eliminar {
+      color: #dc2626;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .btn-eliminar:hover {
+      text-decoration: underline;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 60;
+      inset: 0;
+      background: rgba(17, 24, 39, 0.65);
+      justify-content: center;
+      align-items: center;
+      padding: 1rem;
+    }
+
+    .modal-content {
+      background: white;
+      width: 100%;
+      max-width: 520px;
+      border-radius: 1rem;
+      padding: 1.5rem;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .modal-content input,
+    .modal-content select {
+      width: 100%;
+      padding: 0.75rem 0.9rem;
+      margin-bottom: 0.9rem;
+      border: 1px solid #d1d5db;
+      border-radius: 0.75rem;
+      outline: none;
+      transition: 0.2s;
+      background: white;
+    }
+
+    .modal-content input:focus,
+    .modal-content select:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+
+   
+    /* =========================
+   TOASTS PERSONALIZADOS
+========================= */
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.toast {
+  min-width: 280px;
+  max-width: 380px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  color: white;
+  font-weight: 500;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  animation: slideInToast 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.toast-success {
+  background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.toast-error {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.toast-warning {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.toast-info {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+
+.toast-icon {
+  font-size: 1.2rem;
+  line-height: 1.2;
+}
+
+.toast-content {
+  flex: 1;
+  font-size: 0.95rem;
+  line-height: 1.35;
+}
+
+.toast-close {
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 1.1rem;
+  cursor: pointer;
+  opacity: 0.85;
+}
+
+.toast-close:hover {
+  opacity: 1;
+}
+
+.toast-progress {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.45);
+  animation: toastProgress linear forwards;
+}
+
+@keyframes slideInToast {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes toastProgress {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
+
+/* =========================
+   CONFIRM PERSONALIZADO
+========================= */
+.custom-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(17, 24, 39, 0.6);
+  backdrop-filter: blur(4px);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 9998;
+  padding: 1rem;
+}
+
+.custom-modal-overlay.active {
+  display: flex;
+}
+
+.custom-modal-box {
+  width: 100%;
+  max-width: 420px;
+  background: white;
+  border-radius: 22px;
+  padding: 24px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.22);
+  text-align: center;
+  animation: modalPop 0.2s ease;
+}
+
+.custom-modal-icon {
+  font-size: 2.2rem;
+  margin-bottom: 10px;
+}
+
+.custom-modal-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 8px;
+}
+
+.custom-modal-text {
+  color: #4b5563;
+  font-size: 0.98rem;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.custom-modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.btn-modal {
+  border: none;
+  padding: 12px 18px;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.btn-cancelar {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+.btn-cancelar:hover {
+  background: #d1d5db;
+}
+
+.btn-aceptar {
+  background: #2563eb;
+  color: white;
+}
+
+.btn-aceptar:hover {
+  background: #1d4ed8;
+}
+
+@keyframes modalPop {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Soporte tema oscuro */
+html.theme-oscuro .custom-modal-box {
+  background: #111827 !important;
+}
+
+html.theme-oscuro .custom-modal-title {
+  color: #f9fafb !important;
+}
+
+html.theme-oscuro .custom-modal-text {
+  color: #d1d5db !important;
+}
+
+html.theme-oscuro .btn-cancelar {
+  background: #374151 !important;
+  color: #f9fafb !important;
+}
+ /* =========================
+       TEMAS GLOBALES
+    ========================= */
+
+    /* TEMA CLARO */
+    body.theme-claro {
+      background: #f3f4f6;
+    }
+
+    /* TEMA OSCURO */
+    body.theme-oscuro {
+      background: #0f172a !important;
+    }
+
+    body.theme-oscuro main h1,
+    body.theme-oscuro main h2,
+    body.theme-oscuro main h3,
+    body.theme-oscuro main p,
+    body.theme-oscuro main span,
+    body.theme-oscuro main strong,
+    body.theme-oscuro main label,
+    body.theme-oscuro main th,
+    body.theme-oscuro main td {
+      color: #f9fafb !important;
+    }
+
+    body.theme-oscuro .bg-white,
+    body.theme-oscuro .card,
+    body.theme-oscuro .modal-content {
+      background: #111827 !important;
+      color: #f9fafb !important;
+    }
+
+    body.theme-oscuro th {
+      background: #1f2937 !important;
+      border-bottom: 2px solid #374151 !important;
+    }
+
+    body.theme-oscuro td {
+      border-bottom: 1px solid #1f2937 !important;
+    }
+
+    body.theme-oscuro tr:hover {
+      background: #1f2937 !important;
+    }
+
+    body.theme-oscuro .modal-content input,
+    body.theme-oscuro .modal-content select {
+      background: #1f2937 !important;
+      color: #f9fafb !important;
+      border-color: #374151 !important;
+    }
+
+    body.theme-oscuro .modal-content input::placeholder {
+      color: #9ca3af !important;
+    }
+
+    body.theme-oscuro .sidebar {
+      background: linear-gradient(180deg, #020617 0%, #111827 100%) !important;
+    }
+
+    /* TEMA AZUL */
+    body.theme-azul {
+      background: #dbeafe !important;
+    }
+
+    body.theme-azul .bg-white,
+    body.theme-azul .card,
+    body.theme-azul .modal-content {
+      background: #eff6ff !important;
+    }
+
+    body.theme-azul .sidebar {
+      background: linear-gradient(180deg, #1d4ed8 0%, #1e3a8a 100%) !important;
+    }
+  .flatpickr-calendar {
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  color: #111827;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  padding: 8px;
+}
+.flatpickr-calendar.open {
+  opacity: 1;
+  transform: translateY(0);
+}
+.flatpickr-month {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+}
+.flatpickr-current-month .cur-month {
+  color: #111827 !important;
+  font-size: 15px !important;
+  font-weight: 500 !important;
+}
+.flatpickr-current-month input.cur-year {
+  color: #9ca3af !important;
+  font-size: 15px !important;
+  font-weight: 400 !important;
+}
+.flatpickr-weekdays { background-color: #ffffff !important; }
+span.flatpickr-weekday {
+  background-color: #ffffff !important;
+  color: #6b7280 !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+}
+.flatpickr-prev-month svg path,
+.flatpickr-next-month svg path { fill: #6b7280; }
+.flatpickr-prev-month:hover,
+.flatpickr-next-month:hover { background: transparent !important; }
+.flatpickr-prev-month:hover svg path,
+.flatpickr-next-month:hover svg path { fill: #111827; }
+.flatpickr-day {
+  color: #111827;
+  border-radius: 50% !important;
+  border: none !important;
+}
+.flatpickr-day.prevMonthDay,
+.flatpickr-day.nextMonthDay { color: #d1d5db !important; }
+.flatpickr-day:hover {
+  background-color: #f3f4f6 !important;
+  color: #111827 !important;
+  border: none !important;
+}
+.flatpickr-day.selected,
+.flatpickr-day.selected:hover {
+  background-color: #10b981 !important;
+  border-color: #10b981 !important;
+  color: #ffffff !important;
+}
+.flatpickr-day.today { border: none !important; }
+.flatpickr-day.disabled,
+.flatpickr-day.disabled:hover {
+  color: #d1d5db !important;
+  background: transparent !important;
+}
+  </style>
+ </head>
+
+<body class="font-sans antialiased">
+  <body class="font-sans antialiased">
+  <script>
+    (() => {
+      const tema = localStorage.getItem("appTheme") || "claro";
+      const root = document.documentElement;
+
+      // aplica a HTML (por si tienes CSS que usa html.theme-...)
+      root.classList.remove("theme-claro", "theme-oscuro", "theme-azul");
+      root.classList.add(`theme-${tema}`);
+
+      // aplica a BODY (TU CSS usa body.theme-...)
+      document.body.classList.remove("theme-claro", "theme-oscuro", "theme-azul");
+      document.body.classList.add(`theme-${tema}`);
+
+      // color de fondo
+      root.style.background =
+        tema === "oscuro" ? "#0f172a" :
+        tema === "azul" ? "#dbeafe" :
+        "#f3f4f6";
+    })();
+  </script>
+  <div class="flex">
+    <!-- SIDEBAR -->
+    <aside class="sidebar fixed h-screen text-white p-6 shadow-xl">
+      <h1 class="text-2xl font-bold mb-10 border-b border-gray-700 pb-3 text-center text-blue-400">
+        💼 Mi Sistema
+      </h1>
+
+      <nav>
+        <ul class="space-y-2">
+          <!-- DESPUÉS (Opción A) -->
+          <li><a href="index3.html#dashboard" class="nav-link">🏠 Dashboard</a></li>
+          <li><a href="index3.html#clientes" class="nav-link">👥 Clientes</a></li>
+          <li><a href="prestamos.html" class="nav-link active">💰 Préstamos</a></li>
+          <li><a href="pagos.html" class="nav-link">💳 Pagos</a></li>
+          <li><a href="reportes.html" class="nav-link">📊 Reportes</a></li>
+          <li><a href="configuracion.html" class="nav-link">⚙️ Configuración</a></li>
+        </ul>
+      </nav>
+
+      <div class="mt-8">
+        <button onclick="logout()" class="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-3 rounded-xl transition">
+          Cerrar sesión
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="ml-64 flex-1 min-h-screen p-8">
+      <header class="flex justify-between items-center mb-10">
+        <div>
+          <h1 class="text-4xl font-bold text-gray-800 mb-2">Gestión de Préstamos</h1>
+          <p class="text-gray-600 text-lg">Administra los préstamos registrados en el sistema 💰</p>
+        </div>
+
+        <div class="flex items-center gap-4">
+          <span id="usuarioNombre" class="text-gray-700 font-medium">Cargando...</span>
+          <img
+            src="https://cdn-icons-png.flaticon.com/512/1077/1077012.png"
+            class="w-10 h-10 rounded-full border-2 border-blue-400 shadow"
+            alt="perfil"
+          >
+        </div>
+      </header>
+
+      <!-- TARJETAS -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="bg-white p-6 rounded-2xl shadow card border-l-4 border-blue-500">
+          <h2 class="text-gray-600 text-sm font-semibold uppercase mb-2">Total Prestado</h2>
+          <p id="totalPrestado" class="text-3xl font-bold text-blue-600">$0</p>
+          <p class="text-gray-500 text-sm mt-1">Capital + interés</p>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow card border-l-4 border-green-500">
+          <h2 class="text-gray-600 text-sm font-semibold uppercase mb-2">Préstamos Activos</h2>
+          <p id="prestamosActivos" class="text-3xl font-bold text-green-600">0</p>
+          <p class="text-gray-500 text-sm mt-1">En curso</p>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow card border-l-4 border-blue-500">
+          <h2 class="text-gray-600 text-sm font-semibold uppercase mb-2">Préstamos Pagados</h2>
+          <p id="prestamosPagados" class="text-3xl font-bold text-blue-600">0</p>
+          <p class="text-gray-500 text-sm mt-1">Finalizados</p>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow card border-l-4 border-red-500">
+          <h2 class="text-gray-600 text-sm font-semibold uppercase mb-2">Préstamos Atrasados</h2>
+          <p id="prestamosVencidos" class="text-3xl font-bold text-red-600">0</p>
+          <p class="text-gray-500 text-sm mt-1">A revisar</p>
+        </div>
+      </div>
+
+      <!-- TABLA -->
+      <div class="bg-white p-6 rounded-2xl shadow card">
+        <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
+          <div>
+            <h2 class="text-xl font-semibold text-gray-700">💰 Préstamos Registrados</h2>
+            <p class="text-gray-500 text-sm mt-1">Consulta y administra los préstamos creados</p>
+          </div>
+
+          <button
+            class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-semibold shadow transition"
+            onclick="toggleModal(true)"
+          >
+            ➕ Nuevo Préstamo
+          </button>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Cliente</th>
+                <th>Monto Total</th>
+                <th>Fecha Inicio</th>
+                <th>Fecha Límite</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tablaPrestamos"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <footer class="text-center text-gray-500 text-sm mt-10 mb-4">
+        © 2025 Sistema de Préstamos — Desarrollado por el grupo 💻
+      </footer>
+    </main>
+  </div>
+
+  <!-- MODAL -->
+  <div id="modal" class="modal">
+    <div class="modal-content">
+      <button class="absolute top-3 right-4 text-gray-500 hover:text-red-500 text-2xl" onclick="toggleModal(false)">×</button>
+
+      <h2 class="text-xl font-bold mb-5 text-gray-800">Nuevo Préstamo</h2>
+
+      <form id="formPrestamo">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Cliente</label>
+        <select id="clienteSelect" required></select>
+
+        <label class="block text-sm font-medium text-gray-700 mb-2">Monto</label>
+        <input type="text" id="monto" class="form-control" placeholder="Monto del préstamo" required inputmode="numeric">
+
+        <label class="block text-sm font-medium text-gray-700 mb-2">Interés (%)</label>
+        <input type="number" id="interes" required>
+
+        <label class="block text-sm font-medium text-gray-700 mb-2">Fecha inicio</label>
+        <input type="text" id="inicio" placeholder="aaaa-mm-dd" required>
+
+        <label class="block text-sm font-medium text-gray-700 mb-2">Fecha límite</label>
+        <input type="text" id="limite" placeholder="aaaa-mm-dd" required>
+
+        <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-xl w-full font-semibold transition">
+          Guardar
+        </button>
+      </form>
+    </div>
+  </div>
+<div id="toastContainer" class="toast-container"></div>
+
+<div id="customConfirm" class="custom-modal-overlay">
+  <div class="custom-modal-box">
+    <div class="custom-modal-icon">⚠️</div>
+    <h3 class="custom-modal-title">Confirmación</h3>
+    <p id="customConfirmMessage" class="custom-modal-text">¿Estás seguro?</p>
+
+    <div class="custom-modal-actions">
+      <button id="customConfirmCancel" class="btn-modal btn-cancelar">Cancelar</button>
+      <button id="customConfirmOk" class="btn-modal btn-aceptar">Aceptar</button>
+    </div>
+  </div>
+</div>
+<script>
+  function showToast(message, type = "success", duration = 3000) {
+    const container = document.getElementById("toastContainer");
+
+    const icons = {
+      success: "✅",
+      error: "❌",
+      warning: "⚠️",
+      info: "ℹ️"
+    };
+
+    const toast = document.createElement("div");
+    toast.className = `toast toast-${type}`;
+    toast.innerHTML = `
+      <div class="toast-icon">${icons[type] || "ℹ️"}</div>
+      <div class="toast-content">${message}</div>
+      <button class="toast-close">&times;</button>
+      <div class="toast-progress" style="animation-duration:${duration}ms;"></div>
+    `;
+
+    container.appendChild(toast);
+
+    const removeToast = () => {
+      toast.style.opacity = "0";
+      toast.style.transform = "translateX(30px)";
+      toast.style.transition = "all 0.2s ease";
+      setTimeout(() => toast.remove(), 200);
+    };
+
+    toast.querySelector(".toast-close").addEventListener("click", removeToast);
+    setTimeout(removeToast, duration);
+  }
+
+  function showConfirm(message) {
+    return new Promise((resolve) => {
+      const modal = document.getElementById("customConfirm");
+      const text = document.getElementById("customConfirmMessage");
+      const btnOk = document.getElementById("customConfirmOk");
+      const btnCancel = document.getElementById("customConfirmCancel");
+
+      text.textContent = message;
+      modal.classList.add("active");
+
+      function cleanup(result) {
+        modal.classList.remove("active");
+        btnOk.removeEventListener("click", okHandler);
+        btnCancel.removeEventListener("click", cancelHandler);
+        modal.removeEventListener("click", outsideHandler);
+        resolve(result);
+      }
+
+      function okHandler() {
+        cleanup(true);
+      }
+
+      function cancelHandler() {
+        cleanup(false);
+      }
+
+      function outsideHandler(e) {
+        if (e.target === modal) {
+          cleanup(false);
+        }
+      }
+
+      btnOk.addEventListener("click", okHandler);
+      btnCancel.addEventListener("click", cancelHandler);
+      modal.addEventListener("click", outsideHandler);
+    });
+  }
+
+  const API = "http://127.0.0.1:8000";
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    showToast("Sesión expirada. Inicia sesión nuevamente.", "warning", 1800);
+    setTimeout(() => {
+      window.location.href = "index2.html";
+    }, 1200);
+  }
+
+  function aplicarTemaGuardado() {
+  const tema = localStorage.getItem("appTheme") || "claro";
+  const root = document.documentElement;
+
+  // HTML
+  root.classList.remove("theme-claro", "theme-oscuro", "theme-azul");
+  root.classList.add(`theme-${tema}`);
+
+  // BODY (clave para que tu CSS funcione)
+  document.body.classList.remove("theme-claro", "theme-oscuro", "theme-azul");
+  document.body.classList.add(`theme-${tema}`);
+
+  // Fondo
+  root.style.background =
+    tema === "oscuro" ? "#0f172a" :
+    tema === "azul" ? "#dbeafe" :
+    "#f3f4f6";
+}
+
+  async function cargarUsuario() {
+    try {
+      const resp = await fetch(`${API}/auth/me`, {
+        headers: { "Authorization": "Bearer " + token }
+      });
+
+      if (resp.ok) {
+        const user = await resp.json();
+        document.getElementById("usuarioNombre").textContent = user.nombre;
+      } else {
+        document.getElementById("usuarioNombre").textContent = "Usuario";
+      }
+    } catch (e) {
+      console.log("Error cargando usuario", e);
+      document.getElementById("usuarioNombre").textContent = "Usuario";
+    }
+  }
+
+  function logout() {
+    localStorage.removeItem("token");
+    window.location.href = "index2.html";
+  }
+
+  function toggleModal(show) {
+    document.getElementById("modal").style.display = show ? "flex" : "none";
+  }
+
+  async function cargarClientes() {
+    try {
+      const res = await fetch(`${API}/clientes`, {
+        headers: { "Authorization": "Bearer " + token }
+      });
+
+      const data = await res.json();
+      const select = document.getElementById("clienteSelect");
+
+      select.innerHTML = '<option value="">Seleccione</option>';
+
+      data.forEach(c => {
+        const op = document.createElement("option");
+        op.value = c.id;
+        op.textContent = c.nombre;
+        select.appendChild(op);
+      });
+    } catch (e) {
+      console.log("Error cargando clientes", e);
+    }
+  }
+
+  function obtenerClaseEstado(estado) {
+    if (estado === "Activo") return "activo";
+    if (estado === "Pagado") return "pagado";
+    if (estado === "Atrasado") return "atrasado";
+    return "activo";
+  }
+
+  async function cargarPrestamos() {
+    try {
+      const res = await fetch(`${API}/prestamos`, {
+        headers: { "Authorization": "Bearer " + token }
+      });
+
+      const prestamos = await res.json();
+      const tbody = document.getElementById("tablaPrestamos");
+
+      tbody.innerHTML = "";
+      let totalPrestado = 0;
+      let activos = 0;
+      let pagados = 0;
+      let atrasados = 0;
+
+      prestamos.forEach(p => {
+        const montoTotal = (p.monto_inicial || 0) + (p.total_interes || 0);
+        totalPrestado += montoTotal;
+
+        if (p.estado === "Activo") activos++;
+        if (p.estado === "Pagado") pagados++;
+        if (p.estado === "Atrasado") atrasados++;
+
+        const fila = document.createElement("tr");
+        fila.innerHTML = `
+          <td>${p.cliente ? p.cliente.nombre : "Sin cliente"}</td>
+          <td class="text-blue-600 font-bold">$${montoTotal.toLocaleString()}</td>
+          <td>${p.fecha_inicio}</td>
+          <td>${p.fecha_limite}</td>
+          <td>
+            <span class="badge ${obtenerClaseEstado(p.estado)}">${p.estado}</span>
+          </td>
+          <td>
+            <span onclick="eliminarPrestamo(${p.id})" class="btn-eliminar">Eliminar</span>
+          </td>
+        `;
+        tbody.appendChild(fila);
+      });
+
+      document.getElementById("totalPrestado").textContent = "$" + totalPrestado.toLocaleString();
+      document.getElementById("prestamosActivos").textContent = activos;
+      document.getElementById("prestamosPagados").textContent = pagados;
+      document.getElementById("prestamosVencidos").textContent = atrasados;
+
+    } catch (e) {
+      console.log("Error cargando préstamos", e);
+      showToast("Error cargando préstamos", "error");
+    }
+  }
+
+  document.getElementById("formPrestamo").addEventListener("submit", async e => {
+    e.preventDefault();
+
+    const clienteSelect = document.getElementById("clienteSelect");
+    const montoInput = document.getElementById("monto");
+    const interesInput = document.getElementById("interes");
+    const inicioInput = document.getElementById("inicio");
+    const limiteInput = document.getElementById("limite");
+
+    // ✅ DESPUÉS — reemplázala por estas dos
+const montoRaw = document.getElementById("monto").value.replace(/\./g, "");
+const monto = parseFloat(montoRaw);
+    const interes = parseFloat(interesInput.value);
+
+    const total_interes = monto * (interes / 100);
+
+    const nuevo = {
+      cliente_id: parseInt(clienteSelect.value),
+      monto_inicial: monto,
+      total_interes: total_interes,
+      fecha_inicio: inicioInput.value,
+      fecha_limite: limiteInput.value
+    };
+    
+
+    try {
+      const res = await fetch(`${API}/prestamos`, {
+        method: "POST",
+        headers: {
+          "Authorization": "Bearer " + token,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(nuevo)
+      });
+
+      if (res.ok) {
+        showToast("Préstamo creado correctamente", "success");
+        document.getElementById("formPrestamo").reset();
+        toggleModal(false);
+        cargarPrestamos();
+      } else {
+        showToast("Error creando préstamo", "error");
+      }
+    } catch (e) {
+      showToast("Error conectando con el servidor", "error");
+    }
+  });
+
+  async function eliminarPrestamo(id) {
+    const confirmado = await showConfirm("¿Eliminar préstamo?");
+    if (!confirmado) return;
+
+    try {
+      const res = await fetch(`${API}/prestamos/${id}`, {
+        method: "DELETE",
+        headers: { "Authorization": "Bearer " + token }
+      });
+
+      if (res.ok) {
+        showToast("Préstamo eliminado", "success");
+        cargarPrestamos();
+      } else {
+        showToast("Error al eliminar", "error");
+      }
+    } catch (e) {
+      showToast("Error conectando con el servidor", "error");
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", async () => {
+    aplicarTemaGuardado();
+    await cargarUsuario();
+    await cargarClientes();
+    await cargarPrestamos();
+    const savedPic = localStorage.getItem('profilePic');
+if (savedPic) {
+  const headerPic = document.querySelector('header img[alt="perfil"]');
+  if (headerPic) headerPic.src = savedPic;
+}
+  });
+// Fecha inicio
+flatpickr("#inicio", {
+  dateFormat: "Y-m-d",
+  minDate: "2020-01-01",
+  locale: {
+    firstDayOfWeek: 1,
+    weekdays: {
+      shorthand: ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"],
+      longhand: ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"],
+    },
+    months: {
+      shorthand: ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"],
+      longhand: ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"],
+    }
+  },
+  onChange: function(selectedDates) {
+    if (selectedDates[0]) {
+      const minBase = new Date("2026-01-01");
+      const fechaInicio = selectedDates[0];
+      pickerLimite.set("minDate", fechaInicio > minBase ? fechaInicio : minBase);
+    }
+  }
+});
+
+// Fecha límite — guardada en variable para poder controlarla
+const pickerLimite = flatpickr("#limite", {
+  dateFormat: "Y-m-d",
+  minDate: "2026-01-01",   // ← enero 2026 fijo
+  locale: {
+    firstDayOfWeek: 1,
+    weekdays: {
+      shorthand: ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"],
+      longhand: ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"],
+    },
+    months: {
+      shorthand: ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"],
+      longhand: ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"],
+    }
+  }
+  // sin onChange aquí
+});
+// Auto-formato puntos de miles
+const montoInputPagos = document.getElementById("monto");
+montoInputPagos.addEventListener("input", function () {
+  let raw = this.value.replace(/[^0-9]/g, "");
+  let formatted = "";
+  let count = 0;
+  for (let i = raw.length - 1; i >= 0; i--) {
+    if (count > 0 && count % 3 === 0) {
+      formatted = "." + formatted;
+    }
+    formatted = raw[i] + formatted;
+    count++;
+  }
+  this.value = formatted;
+});
+</script>
+
+</body>
+</html>
