@@ -1,32 +1,78 @@
 <!DOCTYPE html>
-<html lang="es" style="background:#f3f4f6;">
+<html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Reportes - Sistema de Préstamos</title>
-
+ 
+  <!-- ✅ Script de tema PRIMERO — elimina flash de pantalla blanca + fix foto de perfil -->
   <script>
     (() => {
       const tema = localStorage.getItem("appTheme") || "claro";
-      const root = document.documentElement;
-
-      root.classList.remove("theme-claro", "theme-oscuro", "theme-azul");
-      root.classList.add(`theme-${tema}`);
-
-      if (tema === "oscuro") {
-        root.style.background = "#0f172a";
-      } else if (tema === "azul") {
-        root.style.background = "#dbeafe";
-      } else {
-        root.style.background = "#f3f4f6";
-      }
+      document.documentElement.classList.add("theme-" + tema);
+      document.documentElement.style.background =
+        tema === "oscuro" ? "#0f172a" :
+        tema === "azul"   ? "#dbeafe" :
+        "#f3f4f6";
+ 
+      // ✅ Imagen de perfil aplicada antes del primer render
+      document.addEventListener("DOMContentLoaded", () => {
+        const pic = localStorage.getItem("profilePic");
+        const img = document.querySelector("header img[alt='perfil']");
+        if (img) {
+          if (pic) img.src = pic;
+          img.style.opacity = "1";
+        }
+      });
     })();
   </script>
-
+ 
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="reportes.css">
+ 
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+ 
+    /* ── Sidebar ── */
+    .sidebar {
+      width: 16rem;
+      background: linear-gradient(180deg, #111827 0%, #1f2937 100%);
+      transition: all 0.3s ease;
+    }
+    .sidebar:hover { box-shadow: 0 0 25px rgba(59,130,246,0.28); }
+ 
+    .nav-link {
+      display: block;
+      padding: 0.75rem 1rem;
+      border-radius: 0.75rem;
+      color: #d1d5db;
+      transition: all 0.2s ease;
+      font-weight: 500;
+      text-decoration: none;
+    }
+    .nav-link:hover  { background: #374151; color: white; }
+    .nav-link.active { background: #2563eb; color: white; font-weight: 600; box-shadow: 0 4px 12px rgba(37,99,235,0.35); }
+ 
+    /* ── Cards ── */
+    .card { transition: all 0.3s ease; }
+    .card:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+ 
+    /* ── TEMAS ── */
+    html.theme-claro, html.theme-claro body { background: #f3f4f6; }
+ 
+    html.theme-oscuro, html.theme-oscuro body { background: #0f172a !important; }
+    html.theme-oscuro main h1, html.theme-oscuro main h2, html.theme-oscuro main h3,
+    html.theme-oscuro main p, html.theme-oscuro main span, html.theme-oscuro main strong,
+    html.theme-oscuro main label { color: #f9fafb !important; }
+    html.theme-oscuro .bg-white, html.theme-oscuro .card { background: #111827 !important; color: #f9fafb !important; }
+    html.theme-oscuro .sidebar { background: linear-gradient(180deg, #020617 0%, #111827 100%) !important; }
+ 
+    html.theme-azul, html.theme-azul body { background: #dbeafe !important; }
+    html.theme-azul .bg-white, html.theme-azul .card { background: #eff6ff !important; }
+    html.theme-azul .sidebar { background: linear-gradient(180deg, #1d4ed8 0%, #1e3a8a 100%) !important; }
+  </style>
 </head>
-
+ 
 <body class="font-sans antialiased">
   <div class="flex">
     <!-- SIDEBAR -->
@@ -34,25 +80,23 @@
       <h1 class="text-2xl font-bold mb-10 border-b border-gray-700 pb-3 text-center text-blue-400">
         💼 Mi Sistema
       </h1>
-
       <nav>
         <ul class="space-y-2">
-          <li><a href="index3.html" class="nav-link">🏠 Dashboard</a></li>
-          <li><a href="clientes.html" class="nav-link">👥 Clientes</a></li>
-          <li><a href="prestamos.html" class="nav-link">💰 Préstamos</a></li>
-          <li><a href="pagos.html" class="nav-link">💳 Pagos</a></li>
-          <li><a href="reportes.html" class="nav-link active">📊 Reportes</a></li>
+          <li><a href="index3.html"        class="nav-link">🏠 Dashboard</a></li>
+          <li><a href="clientes.html"      class="nav-link">👥 Clientes</a></li>
+          <li><a href="prestamos.html"     class="nav-link">💰 Préstamos</a></li>
+          <li><a href="pagos.html"         class="nav-link">💳 Pagos</a></li>
+          <li><a href="reportes.html"      class="nav-link active">📊 Reportes</a></li>
           <li><a href="configuracion.html" class="nav-link">⚙️ Configuración</a></li>
         </ul>
       </nav>
-
       <div class="mt-8">
         <button onclick="logout()" class="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-3 rounded-xl transition">
           Cerrar sesión
         </button>
       </div>
     </aside>
-
+ 
     <!-- MAIN -->
     <main class="ml-64 flex-1 min-h-screen p-8">
       <header class="flex justify-between items-center mb-10">
@@ -60,17 +104,17 @@
           <h1 class="text-4xl font-bold text-gray-800 mb-2">Centro de Reportes</h1>
           <p class="text-gray-600 text-lg">Descarga información detallada de clientes, préstamos y pagos 📊</p>
         </div>
-
         <div class="flex items-center gap-4">
           <span id="usuarioNombre" class="text-gray-700 font-medium">Cargando...</span>
           <img
             src="https://cdn-icons-png.flaticon.com/512/1077/1077012.png"
             class="w-10 h-10 rounded-full border-2 border-blue-400 shadow"
             alt="perfil"
+            style="opacity:0; transition: opacity 0.2s ease;"
           >
         </div>
       </header>
-
+ 
       <!-- TARJETAS RESUMEN -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         <div class="bg-white p-6 rounded-2xl shadow card border-l-4 border-blue-500">
@@ -78,27 +122,24 @@
           <p class="text-3xl font-bold text-blue-600">Excel / PDF</p>
           <p class="text-gray-500 text-sm mt-1">Base de clientes registrada</p>
         </div>
-
         <div class="bg-white p-6 rounded-2xl shadow card border-l-4 border-green-500">
           <h2 class="text-gray-600 text-sm font-semibold uppercase mb-2">Reportes de Préstamos</h2>
           <p class="text-3xl font-bold text-green-600">Excel / PDF</p>
           <p class="text-gray-500 text-sm mt-1">Estado y detalle de préstamos</p>
         </div>
-
         <div class="bg-white p-6 rounded-2xl shadow card border-l-4 border-yellow-500">
           <h2 class="text-gray-600 text-sm font-semibold uppercase mb-2">Reportes de Pagos</h2>
           <p class="text-3xl font-bold text-yellow-500">Excel / PDF</p>
           <p class="text-gray-500 text-sm mt-1">Historial y control de pagos</p>
         </div>
       </div>
-
+ 
       <!-- DESCARGAS -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <!-- CLIENTES -->
         <div class="bg-white p-6 rounded-2xl shadow card border-l-4 border-blue-500">
           <h2 class="text-xl font-semibold text-gray-700 mb-2">📋 Clientes</h2>
           <p class="text-gray-500 text-sm mb-5">Descarga el listado completo de clientes en el formato que necesites.</p>
-
           <div class="space-y-3">
             <button onclick="descargar('clientes','excel')" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold transition">
               📥 Descargar Excel
@@ -108,12 +149,11 @@
             </button>
           </div>
         </div>
-
-        <!-- PRESTAMOS -->
+ 
+        <!-- PRÉSTAMOS -->
         <div class="bg-white p-6 rounded-2xl shadow card border-l-4 border-green-500">
           <h2 class="text-xl font-semibold text-gray-700 mb-2">💰 Préstamos</h2>
           <p class="text-gray-500 text-sm mb-5">Obtén el detalle de préstamos registrados, estados y montos.</p>
-
           <div class="space-y-3">
             <button onclick="descargar('prestamos','excel')" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold transition">
               📥 Descargar Excel
@@ -123,12 +163,11 @@
             </button>
           </div>
         </div>
-
+ 
         <!-- PAGOS -->
         <div class="bg-white p-6 rounded-2xl shadow card border-l-4 border-yellow-500">
           <h2 class="text-xl font-semibold text-gray-700 mb-2">💳 Pagos</h2>
           <p class="text-gray-500 text-sm mb-5">Descarga el historial de pagos realizados en el sistema.</p>
-
           <div class="space-y-3">
             <button onclick="descargar('pagos','excel')" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-semibold transition">
               📥 Descargar Excel
@@ -139,108 +178,78 @@
           </div>
         </div>
       </div>
-
+ 
       <footer class="text-center text-gray-500 text-sm mt-10 mb-4">
         © 2025 Sistema de Préstamos — Desarrollado por el grupo 💻
       </footer>
     </main>
   </div>
-
-<script>
-  const token = localStorage.getItem("token");
-  const API = "http://127.0.0.1:8000";
-
-  if (!token) window.location.href = "index2.html";
-
-  function aplicarTemaGuardado() {
-    const tema = localStorage.getItem("appTheme") || "claro";
-    const root = document.documentElement;
-
-    root.classList.remove("theme-claro", "theme-oscuro", "theme-azul");
-    root.classList.add(`theme-${tema}`);
-
-    if (tema === "oscuro") {
-      root.style.background = "#0f172a";
-    } else if (tema === "azul") {
-      root.style.background = "#dbeafe";
-    } else {
-      root.style.background = "#f3f4f6";
+ 
+  <script>
+    const token = localStorage.getItem("token");
+    const API   = "http://127.0.0.1:8000";
+ 
+    if (!token) {
+      window.location.href = "index2.html";
     }
-  }
-
-  async function cargarUsuario() {
-    try {
-      const resp = await fetch(`${API}/auth/me`, {
-        headers: { "Authorization": "Bearer " + token }
-      });
-
-      if (resp.ok) {
-        const user = await resp.json();
-        document.getElementById("usuarioNombre").textContent = user.nombre;
-      } else {
-        document.getElementById("usuarioNombre").textContent = "Usuario";
+ 
+    function aplicarTemaGuardado() {
+      const tema = localStorage.getItem("appTheme") || "claro";
+      document.body.classList.remove("theme-claro", "theme-oscuro", "theme-azul");
+      document.body.classList.add("theme-" + tema);
+    }
+ 
+    function logout() {
+      localStorage.removeItem("token");
+      window.location.href = "index2.html";
+    }
+ 
+    async function cargarUsuario() {
+      try {
+        const resp = await fetch(`${API}/auth/me`, {
+          headers: { "Authorization": "Bearer " + token }
+        });
+        document.getElementById("usuarioNombre").textContent =
+          resp.ok ? (await resp.json()).nombre : "Usuario";
+      } catch { document.getElementById("usuarioNombre").textContent = "Usuario"; }
+    }
+ 
+    async function descargar(tipo, formato) {
+      const endpoints = {
+        clientes:  { excel: "/reportes/clientes/excel",  pdf: "/reportes/clientes/pdf"  },
+        prestamos: { excel: "/reportes/prestamos/excel", pdf: "/reportes/prestamos/pdf" },
+        pagos:     { excel: "/reportes/pagos/excel",     pdf: "/reportes/pagos/pdf"     }
+      };
+ 
+      const endpoint = endpoints[tipo]?.[formato];
+      if (!endpoint) return;
+ 
+      try {
+        const res = await fetch(API + endpoint, {
+          headers: { "Authorization": "Bearer " + token }
+        });
+ 
+        if (!res.ok) { alert("❌ Error descargando reporte"); return; }
+ 
+        const blob = await res.blob();
+        const url  = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href     = url;
+        link.download = `${tipo}_reporte.${formato}`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.URL.revokeObjectURL(url);
+      } catch (e) {
+        alert("❌ Error conectando con servidor");
+        console.log(e);
       }
-    } catch (e) {
-      console.log("Error cargando usuario", e);
-      document.getElementById("usuarioNombre").textContent = "Usuario";
     }
-  }
-
-  function logout() {
-    localStorage.removeItem("token");
-    window.location.href = "index2.html";
-  }
-
-  async function descargar(tipo, formato) {
-    let endpoint = "";
-
-    if (tipo === "clientes" && formato === "excel") endpoint = "/reportes/clientes/excel";
-    if (tipo === "clientes" && formato === "pdf") endpoint = "/reportes/clientes/pdf";
-
-    if (tipo === "prestamos" && formato === "excel") endpoint = "/reportes/prestamos/excel";
-    if (tipo === "prestamos" && formato === "pdf") endpoint = "/reportes/prestamos/pdf";
-
-    if (tipo === "pagos" && formato === "excel") endpoint = "/reportes/pagos/excel";
-    if (tipo === "pagos" && formato === "pdf") endpoint = "/reportes/pagos/pdf";
-
-    try {
-      const res = await fetch(API + endpoint, {
-        method: "GET",
-        headers: { "Authorization": "Bearer " + token }
-      });
-
-      if (!res.ok) {
-        alert("❌ Error descargando reporte");
-        return;
-      }
-
-      const blob = await res.blob();
-      const url = window.URL.createObjectURL(blob);
-
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `${tipo}_reporte.${formato}`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-
-    } catch (e) {
-      alert("❌ Error conectando con servidor");
-      console.log(e);
-    }
-  }
-
-  document.addEventListener("DOMContentLoaded", async () => {
-    aplicarTemaGuardado();
-    await cargarUsuario();
-    const savedPic = localStorage.getItem('profilePic');
-if (savedPic) {
-  const headerPic = document.querySelector('header img[alt="perfil"]');
-  if (headerPic) headerPic.src = savedPic;
-}
-  });
-</script>
-
+ 
+    document.addEventListener("DOMContentLoaded", async () => {
+      aplicarTemaGuardado();
+      await cargarUsuario();
+    });
+  </script>
 </body>
 </html>

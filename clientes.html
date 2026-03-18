@@ -4,561 +4,604 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Clientes - Sistema de Préstamos</title>
-
-  <!-- Redirección de respaldo si JS falla -->
-  <meta http-equiv="refresh" content="0;url=index3.html#clientes" />
+ 
+  <!-- ✅ Script de tema PRIMERO — elimina flash de pantalla blanca + fix foto de perfil -->
+  <script>
+    (() => {
+      const tema = localStorage.getItem("appTheme") || "claro";
+      document.documentElement.classList.add("theme-" + tema);
+      document.documentElement.style.background =
+        tema === "oscuro" ? "#0f172a" :
+        tema === "azul"   ? "#dbeafe" :
+        "#f3f4f6";
+ 
+      // ✅ Imagen de perfil aplicada antes del primer render
+      document.addEventListener("DOMContentLoaded", () => {
+        const pic = localStorage.getItem("profilePic");
+        const img = document.querySelector("header img[alt='perfil']");
+        if (img) {
+          if (pic) img.src = pic;
+          img.style.opacity = "1";
+        }
+      });
+    })();
+  </script>
+ 
   <script src="https://cdn.tailwindcss.com"></script>
-
-  
-
+  <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+ 
   <style>
-    html, body {
-      margin: 0;
-      background: #f3f4f6;
-      font-family: "Poppins", sans-serif;
-    }
-
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+ 
+    /* ── Sidebar ── */
     .sidebar {
       width: 16rem;
       background: linear-gradient(180deg, #111827 0%, #1f2937 100%);
       transition: all 0.3s ease;
-      height: 100vh;
-      position: fixed;
-      top: 0;
-      left: 0;
-      padding: 1rem;
-      display: flex;
-      flex-direction: column;
     }
-
-    .sidebar h2 {
-      text-align: center;
-      font-size: 1.25rem;
-      font-weight: 600;
-      margin-bottom: 1rem;
-      border-bottom: 1px solid #374151;
-      padding-bottom: 0.5rem;
-    }
-
-    .sidebar a {
-      color: #d1d5db;
-      padding: 12px 20px;
-      text-decoration: none;
+    .sidebar:hover { box-shadow: 0 0 25px rgba(59,130,246,0.28); }
+ 
+    .nav-link {
       display: block;
-      font-weight: 500;
+      padding: 0.75rem 1rem;
+      border-radius: 0.75rem;
+      color: #d1d5db;
       transition: all 0.2s ease;
-    }
-
-    .sidebar a:hover {
-      background: #374151;
-      color: white;
-    }
-
-    .sidebar a.active {
-      background: #2563eb;
-      color: white;
-      font-weight: 600;
-    }
-
-    .btn-nueva {
-      background: #16a34a;
-      color: white;
-      text-align: center;
-      margin: 1rem 20px;
-      padding: 10px;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .btn-nueva:hover {
-      background: #15803d;
-    }
-
-    .main {
-      margin-left: 16rem;
-      padding: 2rem;
-    }
-
-    .card {
-      background: white;
-      border-radius: 12px;
-      padding: 1.5rem;
-      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 1rem;
-    }
-
-    th {
-      background: #f9fafb;
-      color: #374151;
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      font-weight: 600;
-      padding: 12px 8px;
-      border-bottom: 2px solid #e5e7eb;
-    }
-
-    td {
-      padding: 10px 8px;
-      border-bottom: 1px solid #f3f4f6;
-      color: #111827;
-      font-size: 0.9rem;
-    }
-
-    tr:hover {
-      background: #f9fafb;
-    }
-
-    .badge {
-      padding: 3px 8px;
-      border-radius: 8px;
-      color: white;
-      font-size: 0.75rem;
       font-weight: 500;
+      text-decoration: none;
     }
-
-    .activo {
-      background: #10b981;
+    .nav-link:hover  { background: #374151; color: white; }
+    .nav-link.active { background: #2563eb; color: white; font-weight: 600; box-shadow: 0 4px 12px rgba(37,99,235,0.35); }
+ 
+    /* ── Cards ── */
+    .card { transition: all 0.3s ease; }
+    .card:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+ 
+    /* ── Table ── */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; min-width: 1000px; border-collapse: collapse; margin-top: 1rem; }
+    th {
+      background: #f9fafb; color: #374151; font-size: 0.75rem;
+      text-transform: uppercase; font-weight: 600;
+      padding: 12px 8px; border-bottom: 2px solid #e5e7eb; text-align: left;
     }
-
-    .inactivo {
-      background: #ef4444;
-    }
-
-    .btn-editar {
-      color: #2563eb;
-      cursor: pointer;
-      font-weight: 600;
-    }
-
-    .btn-editar:hover {
-      text-decoration: underline;
-    }
-
-    .btn-eliminar {
-      color: #dc2626;
-      cursor: pointer;
-      font-weight: 600;
-    }
-
-    .btn-eliminar:hover {
-      text-decoration: underline;
-    }
-
-    /* Modal */
+    td { padding: 10px 8px; border-bottom: 1px solid #f3f4f6; color: #111827; font-size: 0.9rem; vertical-align: middle; }
+    tr:hover { background: #f9fafb; }
+ 
+    /* ── Badges ── */
+    .badge { padding: 4px 10px; border-radius: 999px; color: white; font-size: 0.75rem; font-weight: 600; display: inline-block; }
+    .activo   { background: #10b981; }
+    .inactivo { background: #ef4444; }
+ 
+    .btn-editar   { color: #2563eb; cursor: pointer; font-weight: 600; }
+    .btn-editar:hover { text-decoration: underline; }
+    .btn-eliminar { color: #dc2626; cursor: pointer; font-weight: 600; }
+    .btn-eliminar:hover { text-decoration: underline; }
+ 
+    /* ── Modal ── */
     .modal {
-      display: none;
-      position: fixed;
-      z-index: 50;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      justify-content: center;
-      align-items: center;
+      display: none; position: fixed; z-index: 60; inset: 0;
+      background: rgba(17,24,39,0.65); justify-content: center; align-items: center; padding: 1rem;
     }
-
     .modal-content {
-      background: white;
-      padding: 2rem;
-      border-radius: 10px;
-      width: 400px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      background: white; width: 100%; max-width: 520px; border-radius: 1rem;
+      padding: 1.5rem; box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+      max-height: 90vh; overflow-y: auto; position: relative;
     }
-
     .modal-content input,
     .modal-content select {
-      width: 100%;
-      padding: 8px;
-      margin-bottom: 10px;
-      border: 1px solid #d1d5db;
-      border-radius: 6px;
+      width: 100%; padding: 0.75rem 0.9rem; margin-bottom: 0.9rem;
+      border: 1px solid #d1d5db; border-radius: 0.75rem; outline: none; transition: 0.2s; background: white;
     }
-
-    .btn-guardar {
-      background: #16a34a;
-      color: white;
-      padding: 8px 14px;
-      border-radius: 6px;
-      font-weight: 600;
-      cursor: pointer;
+    .modal-content input:focus,
+    .modal-content select:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
+ 
+    /* ── Toasts ── */
+    .toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 12px; }
+    .toast {
+      min-width: 280px; max-width: 380px; padding: 14px 16px; border-radius: 16px;
+      color: white; font-weight: 500; box-shadow: 0 12px 30px rgba(0,0,0,0.18);
+      display: flex; align-items: flex-start; gap: 12px;
+      animation: slideInToast 0.3s ease; position: relative; overflow: hidden;
     }
-
-    .btn-guardar:hover {
-      background: #15803d;
+    .toast-success { background: linear-gradient(135deg, #10b981, #059669); }
+    .toast-error   { background: linear-gradient(135deg, #ef4444, #dc2626); }
+    .toast-warning { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .toast-info    { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+    .toast-icon    { font-size: 1.2rem; line-height: 1.2; }
+    .toast-content { flex: 1; font-size: 0.95rem; line-height: 1.35; }
+    .toast-close   { background: transparent; border: none; color: white; font-size: 1.1rem; cursor: pointer; opacity: 0.85; }
+    .toast-close:hover { opacity: 1; }
+    .toast-progress {
+      position: absolute; left: 0; bottom: 0; height: 4px;
+      background: rgba(255,255,255,0.45); animation: toastProgress linear forwards;
     }
-
-    .btn-cerrar {
-      background: #dc2626;
-      color: white;
-      padding: 8px 14px;
-      border-radius: 6px;
-      font-weight: 600;
-      cursor: pointer;
+    @keyframes slideInToast { from { opacity:0; transform:translateX(40px); } to { opacity:1; transform:translateX(0); } }
+    @keyframes toastProgress { from { width:100%; } to { width:0%; } }
+ 
+    /* ── Confirm modal ── */
+    .custom-modal-overlay {
+      position: fixed; inset: 0; background: rgba(17,24,39,0.6);
+      backdrop-filter: blur(4px); display: none; justify-content: center;
+      align-items: center; z-index: 9998; padding: 1rem;
     }
-
-    .btn-cerrar:hover {
-      background: #b91c1c;
+    .custom-modal-overlay.active { display: flex; }
+    .custom-modal-box {
+      width: 100%; max-width: 420px; background: white; border-radius: 22px;
+      padding: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.22);
+      text-align: center; animation: modalPop 0.2s ease;
     }
-     /* =========================
-       TEMAS GLOBALES
-    ========================= */
-
-    /* TEMA CLARO */
-    body.theme-claro {
-      background: #f3f4f6;
-    }
-
-    /* TEMA OSCURO */
-    body.theme-oscuro {
-      background: #0f172a !important;
-    }
-
-    body.theme-oscuro main h1,
-    body.theme-oscuro main h2,
-    body.theme-oscuro main h3,
-    body.theme-oscuro main p,
-    body.theme-oscuro main span,
-    body.theme-oscuro main strong,
-    body.theme-oscuro main label,
-    body.theme-oscuro main th,
-    body.theme-oscuro main td {
-      color: #f9fafb !important;
-    }
-
-    body.theme-oscuro .bg-white,
-    body.theme-oscuro .card,
-    body.theme-oscuro .modal-content {
-      background: #111827 !important;
-      color: #f9fafb !important;
-    }
-
-    body.theme-oscuro th {
-      background: #1f2937 !important;
-      border-bottom: 2px solid #374151 !important;
-    }
-
-    body.theme-oscuro td {
-      border-bottom: 1px solid #1f2937 !important;
-    }
-
-    body.theme-oscuro tr:hover {
-      background: #1f2937 !important;
-    }
-
-    body.theme-oscuro .modal-content input,
-    body.theme-oscuro .modal-content select {
-      background: #1f2937 !important;
-      color: #f9fafb !important;
-      border-color: #374151 !important;
-    }
-
-    body.theme-oscuro .modal-content input::placeholder {
-      color: #9ca3af !important;
-    }
-
-    body.theme-oscuro .sidebar {
-      background: linear-gradient(180deg, #020617 0%, #111827 100%) !important;
-    }
-
-    /* TEMA AZUL */
-    body.theme-azul {
-      background: #dbeafe !important;
-    }
-
-    body.theme-azul .bg-white,
-    body.theme-azul .card,
-    body.theme-azul .modal-content {
-      background: #eff6ff !important;
-    }
-
-    body.theme-azul .sidebar {
-      background: linear-gradient(180deg, #1d4ed8 0%, #1e3a8a 100%) !important;
-    }
-
+    .custom-modal-icon  { font-size: 2.2rem; margin-bottom: 10px; }
+    .custom-modal-title { font-size: 1.3rem; font-weight: 700; color: #111827; margin-bottom: 8px; }
+    .custom-modal-text  { color: #4b5563; font-size: 0.98rem; line-height: 1.5; margin-bottom: 20px; }
+    .custom-modal-actions { display: flex; justify-content: center; gap: 12px; }
+    .btn-modal    { border: none; padding: 12px 18px; border-radius: 12px; font-weight: 600; cursor: pointer; transition: 0.2s ease; }
+    .btn-cancelar { background: #e5e7eb; color: #111827; }
+    .btn-cancelar:hover { background: #d1d5db; }
+    .btn-aceptar  { background: #2563eb; color: white; }
+    .btn-aceptar:hover  { background: #1d4ed8; }
+    @keyframes modalPop { from { opacity:0; transform:scale(0.95) translateY(8px); } to { opacity:1; transform:scale(1) translateY(0); } }
+ 
+    /* ── TEMAS ── */
+    html.theme-claro, html.theme-claro body { background: #f3f4f6; }
+ 
+    html.theme-oscuro, html.theme-oscuro body { background: #0f172a !important; }
+    html.theme-oscuro main h1, html.theme-oscuro main h2,
+    html.theme-oscuro main h3, html.theme-oscuro main p,
+    html.theme-oscuro main span, html.theme-oscuro main strong,
+    html.theme-oscuro main label, html.theme-oscuro main th,
+    html.theme-oscuro main td { color: #f9fafb !important; }
+    html.theme-oscuro .bg-white, html.theme-oscuro .card,
+    html.theme-oscuro .modal-content { background: #111827 !important; color: #f9fafb !important; }
+    html.theme-oscuro th { background: #1f2937 !important; border-bottom: 2px solid #374151 !important; }
+    html.theme-oscuro td { border-bottom: 1px solid #1f2937 !important; }
+    html.theme-oscuro tr:hover { background: #1f2937 !important; }
+    html.theme-oscuro .modal-content input,
+    html.theme-oscuro .modal-content select { background: #1f2937 !important; color: #f9fafb !important; border-color: #374151 !important; }
+    html.theme-oscuro .modal-content input::placeholder { color: #9ca3af !important; }
+    html.theme-oscuro .sidebar { background: linear-gradient(180deg, #020617 0%, #111827 100%) !important; }
+    html.theme-oscuro .custom-modal-box  { background: #111827 !important; }
+    html.theme-oscuro .custom-modal-title { color: #f9fafb !important; }
+    html.theme-oscuro .custom-modal-text  { color: #d1d5db !important; }
+    html.theme-oscuro .btn-cancelar       { background: #374151 !important; color: #f9fafb !important; }
+ 
+    html.theme-azul, html.theme-azul body { background: #dbeafe !important; }
+    html.theme-azul .bg-white, html.theme-azul .card,
+    html.theme-azul .modal-content { background: #eff6ff !important; }
+    html.theme-azul .sidebar { background: linear-gradient(180deg, #1d4ed8 0%, #1e3a8a 100%) !important; }
+ 
+    /* ── Flatpickr ── */
+    .flatpickr-calendar { opacity:0; transform:translateY(10px); transition: opacity 0.3s ease, transform 0.3s ease; }
+    .flatpickr-calendar.open { opacity:1; transform:translateY(0); }
+    .flatpickr-month { background-color: #2563eb !important; color: #fff !important; }
+    .flatpickr-day { color: #111827; border-radius: 50% !important; border: none !important; }
+    .flatpickr-day:hover { background-color: #16a34a !important; color: white !important; }
+    .flatpickr-day.selected, .flatpickr-day.selected:hover { background-color: #10b981 !important; border-color: #10b981 !important; color: #fff !important; }
+    .flatpickr-day.today { border: none !important; }
+    .flatpickr-day.disabled, .flatpickr-day.disabled:hover { color: #d1d5db !important; background: transparent !important; }
   </style>
 </head>
-
-<body>
-  <!-- Sidebar -->
-  <div class="sidebar">
-    <h2>Sistema de Préstamos</h2>
-    <a href="index3.html">Panel principal</a>
-    <a href="prestamos.html">Préstamos</a>
-    <a href="clientes.html" class="active">Clientes</a>
-    <a href="historialpagos.html">Historial</a>
-    <a href="reportes.html">Reportes</a>
-    <div class="btn-nueva" onclick="window.location.href='index3.html'">Regresar al inicio</div>
+ 
+<body class="font-sans antialiased">
+  <div class="flex">
+    <!-- SIDEBAR -->
+    <aside class="sidebar fixed h-screen text-white p-6 shadow-xl">
+      <h1 class="text-2xl font-bold mb-10 border-b border-gray-700 pb-3 text-center text-blue-400">
+        💼 Mi Sistema
+      </h1>
+      <nav>
+        <ul class="space-y-2">
+          <li><a href="index3.html#dashboard" class="nav-link">🏠 Dashboard</a></li>
+          <li><a href="clientes.html"          class="nav-link active">👥 Clientes</a></li>
+          <li><a href="prestamos.html"         class="nav-link">💰 Préstamos</a></li>
+          <li><a href="pagos.html"             class="nav-link">💳 Pagos</a></li>
+          <li><a href="reportes.html"          class="nav-link">📊 Reportes</a></li>
+          <li><a href="configuracion.html"     class="nav-link">⚙️ Configuración</a></li>
+        </ul>
+      </nav>
+      <div class="mt-8">
+        <button onclick="logout()" class="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-3 rounded-xl transition">
+          Cerrar sesión
+        </button>
+      </div>
+    </aside>
+ 
+    <!-- MAIN -->
+    <main class="ml-64 flex-1 min-h-screen p-8">
+      <header class="flex justify-between items-center mb-10">
+        <div>
+          <h1 class="text-4xl font-bold text-gray-800 mb-2">Gestión de Clientes</h1>
+          <p class="text-gray-600 text-lg">Administra los clientes registrados en el sistema 👥</p>
+        </div>
+        <div class="flex items-center gap-4">
+          <span id="usuarioNombre" class="text-gray-700 font-medium">Cargando...</span>
+          <img src="https://cdn-icons-png.flaticon.com/512/1077/1077012.png"
+            class="w-10 h-10 rounded-full border-2 border-blue-400 shadow" alt="perfil"
+            style="opacity:0; transition: opacity 0.2s ease;">
+        </div>
+      </header>
+ 
+      <!-- Contadores -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <div class="bg-white p-6 rounded-2xl shadow card border-l-4 border-blue-500">
+          <h2 class="text-gray-600 text-sm font-semibold uppercase mb-2">Total de Clientes</h2>
+          <p id="contadorClientes" class="text-3xl font-bold text-blue-600">0</p>
+          <p class="text-green-600 text-sm mt-1">Registrados</p>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow card border-l-4 border-green-500">
+          <h2 class="text-gray-600 text-sm font-semibold uppercase mb-2">Clientes Activos</h2>
+          <p id="contadorActivos" class="text-3xl font-bold text-green-600">0</p>
+          <p class="text-gray-500 text-sm mt-1">Disponibles</p>
+        </div>
+        <div class="bg-white p-6 rounded-2xl shadow card border-l-4 border-red-500">
+          <h2 class="text-gray-600 text-sm font-semibold uppercase mb-2">Clientes Inactivos</h2>
+          <p id="contadorInactivos" class="text-3xl font-bold text-red-600">0</p>
+          <p class="text-gray-500 text-sm mt-1">A revisar</p>
+        </div>
+      </div>
+ 
+      <!-- Tabla -->
+      <div class="bg-white p-6 rounded-2xl shadow card">
+        <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
+          <div>
+            <h2 class="text-xl font-semibold text-gray-700">👥 Listado de Clientes</h2>
+            <p class="text-gray-500 text-sm mt-1">Consulta, edita y elimina registros fácilmente</p>
+          </div>
+          <button id="abrirModal"
+            class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-semibold shadow transition">
+            ➕ Nuevo Cliente
+          </button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Nombre</th><th>Cédula</th><th>Teléfono</th><th>Correo</th>
+                <th>Dirección</th><th>Monto</th><th>Fecha</th><th>Estado</th><th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tablaClientes"></tbody>
+          </table>
+        </div>
+      </div>
+ 
+      <footer class="text-center text-gray-500 text-sm mt-10 mb-4">
+        © 2025 Sistema de Préstamos — Desarrollado por el grupo 💻
+      </footer>
+    </main>
   </div>
-
-  <!-- MAIN -->
-  <div class="main">
-    <div class="flex justify-between items-center mb-6">
-      <h1 class="text-2xl font-bold text-gray-800">👥 Listado de Clientes</h1>
-      <button class="btn-crear bg-blue-600 text-white px-4 py-2 rounded-md" id="abrirModal">➕ Nuevo Cliente</button>
-    </div>
-
-    <div class="card">
-      <table>
-        <thead>
-          <tr>
-            <th>Nombre</th><th>Cédula</th><th>Teléfono</th><th>Correo</th>
-            <th>Dirección</th><th>Monto</th><th>Fecha</th><th>Estado</th><th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody id="tablaClientes"></tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- MODAL -->
+ 
+  <!-- MODAL CLIENTE -->
   <div class="modal" id="modalCliente">
     <div class="modal-content">
-      <h2>Nuevo Cliente</h2>
-      <input type="text" id="nombre" placeholder="Nombre completo" required>
-      <input type="text" id="cedula" placeholder="Cédula" required>
-      <input type="text" id="telefono" placeholder="Teléfono">
-      <input type="email" id="correo" placeholder="Correo electrónico">
-      <input type="text" id="direccion" placeholder="Dirección">
-      <input type="text" id="monto" class="form-control" placeholder="Monto del préstamo" required inputmode="numeric">
-      <input type="date" id="fecha" required>
+      <div class="flex justify-between items-center mb-5">
+        <h2 id="tituloModal" class="text-xl font-bold text-gray-800">Nuevo Cliente</h2>
+        <button id="cerrarModalX" class="text-gray-400 hover:text-red-500 text-2xl leading-none">&times;</button>
+      </div>
+      <input type="text"  id="nombre"    placeholder="Nombre completo" required>
+      <input type="text"  id="cedula"    placeholder="Cédula" required>
+      <input type="text"  id="telefono"  placeholder="Teléfono">
+      <input type="email" id="correo"    placeholder="Correo electrónico">
+      <input type="text"  id="direccion" placeholder="Dirección">
+      <input type="text"  id="monto"     placeholder="Monto del préstamo" required inputmode="numeric">
+      <input type="text"  id="fecha"     placeholder="Selecciona una fecha" required>
       <select id="estado">
         <option value="Activo">Activo</option>
         <option value="Inactivo">Inactivo</option>
       </select>
-
-      <div class="flex justify-end gap-2 mt-4">
-        <button class="btn-cerrar" id="cerrarModal">Cancelar</button>
-        <button class="btn-guardar" id="guardarCliente">Guardar</button>
+      <div class="flex justify-end gap-3 mt-4">
+        <button id="cerrarModal"
+          class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-xl font-semibold transition">
+          Cancelar
+        </button>
+        <button id="guardarCliente"
+          class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl font-semibold transition">
+          Guardar
+        </button>
       </div>
     </div>
   </div>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script>
-function showToast(message, type = "success", duration = 3000) {
-    const container = document.getElementById("toastContainer");
-
-    const icons = {
-      success: "✅",
-      error: "❌",
-      warning: "⚠️",
-      info: "ℹ️"
-    };
-
-    const toast = document.createElement("div");
-    toast.className = `toast toast-${type}`;
-    toast.innerHTML = `
-      <div class="toast-icon">${icons[type] || "ℹ️"}</div>
-      <div class="toast-content">${message}</div>
-      <button class="toast-close">&times;</button>
-      <div class="toast-progress" style="animation-duration:${duration}ms;"></div>
-    `;
-
-    container.appendChild(toast);
-
-    const removeToast = () => {
-      toast.style.opacity = "0";
-      toast.style.transform = "translateX(30px)";
-      toast.style.transition = "all 0.2s ease";
-      setTimeout(() => toast.remove(), 200);
-    };
-
-    toast.querySelector(".toast-close").addEventListener("click", removeToast);
-    setTimeout(removeToast, duration);
-  }
-
-  const API_URL = "http://127.0.0.1:8000";
-  const token = localStorage.getItem("token");
  
-  if (!token) {
-    showToast("Sesión expirada. Inicia sesión nuevamente.", "warning", 1800);
-    setTimeout(() => {
+  <!-- TOAST -->
+  <div id="toastContainer" class="toast-container"></div>
+ 
+  <!-- CONFIRM -->
+  <div id="customConfirm" class="custom-modal-overlay">
+    <div class="custom-modal-box">
+      <div class="custom-modal-icon">⚠️</div>
+      <h3 class="custom-modal-title">Confirmación</h3>
+      <p id="customConfirmMessage" class="custom-modal-text">¿Estás seguro?</p>
+      <div class="custom-modal-actions">
+        <button id="customConfirmCancel" class="btn-modal btn-cancelar">Cancelar</button>
+        <button id="customConfirmOk"     class="btn-modal btn-aceptar">Aceptar</button>
+      </div>
+    </div>
+  </div>
+ 
+  <script>
+    /* ══════════════════════════════════════
+       UTILIDADES
+    ══════════════════════════════════════ */
+    function showToast(message, type = "success", duration = 3000) {
+      const container = document.getElementById("toastContainer");
+      if (!container) return;
+      if (typeof message === "object") message = JSON.stringify(message);
+      const icons = { success:"✅", error:"❌", warning:"⚠️", info:"ℹ️" };
+      const toast = document.createElement("div");
+      toast.className = `toast toast-${type}`;
+      toast.innerHTML = `
+        <div class="toast-icon">${icons[type] || "ℹ️"}</div>
+        <div class="toast-content">${message}</div>
+        <button class="toast-close">&times;</button>
+        <div class="toast-progress" style="animation-duration:${duration}ms;"></div>
+      `;
+      container.appendChild(toast);
+      const remove = () => {
+        toast.style.opacity = "0";
+        toast.style.transform = "translateX(30px)";
+        toast.style.transition = "all 0.2s ease";
+        setTimeout(() => toast.remove(), 200);
+      };
+      toast.querySelector(".toast-close").addEventListener("click", remove);
+      setTimeout(remove, duration);
+    }
+ 
+    function showConfirm(message) {
+      return new Promise((resolve) => {
+        const modal  = document.getElementById("customConfirm");
+        const text   = document.getElementById("customConfirmMessage");
+        const btnOk  = document.getElementById("customConfirmOk");
+        const btnCan = document.getElementById("customConfirmCancel");
+        text.textContent = message;
+        modal.classList.add("active");
+        function cleanup(r) {
+          modal.classList.remove("active");
+          btnOk.removeEventListener("click",  ok);
+          btnCan.removeEventListener("click", cancel);
+          modal.removeEventListener("click",  outside);
+          resolve(r);
+        }
+        function ok()      { cleanup(true);  }
+        function cancel()  { cleanup(false); }
+        function outside(e){ if (e.target === modal) cleanup(false); }
+        btnOk.addEventListener("click",  ok);
+        btnCan.addEventListener("click", cancel);
+        modal.addEventListener("click",  outside);
+      });
+    }
+ 
+    /* ══════════════════════════════════════
+       CONFIG
+    ══════════════════════════════════════ */
+    const API_URL = "http://127.0.0.1:8000";
+    const token   = localStorage.getItem("token");
+    let clienteEditando = null;
+ 
+    if (!token) {
+      showToast("Sesión expirada. Inicia sesión nuevamente.", "warning", 1800);
+      setTimeout(() => { window.location.href = "index2.html"; }, 1200);
+    }
+ 
+    function aplicarTemaGuardado() {
+      const tema = localStorage.getItem("appTheme") || "claro";
+      document.body.classList.remove("theme-claro", "theme-oscuro", "theme-azul");
+      document.body.classList.add("theme-" + tema);
+    }
+ 
+    function logout() {
+      localStorage.removeItem("token");
       window.location.href = "index2.html";
-    }, 1200);
-  }
-
-  async function loadUser() {
-    try {
-      const resp = await fetch(`${API_URL}/auth/me`, {
-        headers: { Authorization: "Bearer " + token },
-      });
-
-      if (!resp.ok) return;
-
-      const data = await resp.json();
-      document.getElementById("admin-name").textContent = data.nombre;
-      document.getElementById("admin-email").textContent = data.email;
-      document.getElementById("usuarioNombre").textContent = data.nombre;
-
-      document.getElementById("edit-name").value = data.nombre;
-      document.getElementById("edit-email").value = data.email;
-    } catch (e) {
-      console.log("Error:", e);
     }
-  }
-
-  async function saveProfile() {
-    const nombre = document.getElementById("edit-name").value.trim();
-    const email = document.getElementById("edit-email").value.trim();
-    const password = document.getElementById("edit-password").value;
-
-    try {
-      const resp = await fetch(`${API_URL}/auth/update`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + token,
-        },
-        body: JSON.stringify({ nombre, email, password }),
-      });
-
-      if (resp.ok) {
-        showToast("Perfil actualizado", "success");
-        closeEditProfileModal();
-        document.getElementById("edit-password").value = "";
-        loadUser();
-      } else {
-        showToast("Error al actualizar", "error");
-      }
-    } catch (e) {
-      showToast("Error conectando con el servidor", "error");
+ 
+    /* ══════════════════════════════════════
+       USUARIO
+    ══════════════════════════════════════ */
+    async function cargarUsuario() {
+      try {
+        const resp = await fetch(`${API_URL}/auth/me`, {
+          headers: { "Authorization": "Bearer " + token }
+        });
+        document.getElementById("usuarioNombre").textContent =
+          resp.ok ? (await resp.json()).nombre : "Usuario";
+      } catch { document.getElementById("usuarioNombre").textContent = "Usuario"; }
     }
-  }
-
-  function openEditProfileModal() {
-    const modal = document.getElementById("editProfileModal");
-    modal.classList.remove("hidden");
-    modal.classList.add("flex");
-  }
-
-  function closeEditProfileModal() {
-    const modal = document.getElementById("editProfileModal");
-    modal.classList.add("hidden");
-    modal.classList.remove("flex");
-  }
-
-  function saveSecuritySettings() {
-    const security = {
-      twoFactor: document.getElementById("two-factor").checked,
-      rememberSession: document.getElementById("remember-session").checked,
-      autoLock: document.getElementById("auto-lock").checked,
+ 
+    /* ══════════════════════════════════════
+       CLIENTES — lógica 100% propia de clientes.html
+    ══════════════════════════════════════ */
+    const modalEl       = document.getElementById("modalCliente");
+    const abrirModalBtn = document.getElementById("abrirModal");
+    const cerrarModalBtn= document.getElementById("cerrarModal");
+    const cerrarModalX  = document.getElementById("cerrarModalX");
+    const guardarBtn    = document.getElementById("guardarCliente");
+    const tituloModal   = document.getElementById("tituloModal");
+    const tabla         = document.getElementById("tablaClientes");
+ 
+    abrirModalBtn.onclick = () => {
+      limpiarFormulario();
+      clienteEditando = null;
+      guardarBtn.textContent  = "Guardar";
+      tituloModal.textContent = "Nuevo Cliente";
+      modalEl.style.display = "flex";
     };
-
-    localStorage.setItem("securitySettings", JSON.stringify(security));
-    showToast("Configuración de seguridad guardada", "success");
-  }
-
-  function saveNotificationSettings() {
-    const notifications = {
-      pagosVencidos: document.getElementById("noti-pagos-vencidos").checked,
-      prestamosAprobados: document.getElementById("noti-prestamos-aprobados").checked,
-      resumenes: document.getElementById("noti-resumenes").checked,
-      seguridad: document.getElementById("noti-seguridad").checked,
-    };
-
-    localStorage.setItem("notificationSettings", JSON.stringify(notifications));
-    showToast("Preferencias de notificación guardadas", "success");
-  }
-
-  function loadLocalSettings() {
-    const security = JSON.parse(localStorage.getItem("securitySettings") || "{}");
-    const notifications = JSON.parse(localStorage.getItem("notificationSettings") || "{}");
-
-    if (typeof security.twoFactor === "boolean") {
-      document.getElementById("two-factor").checked = security.twoFactor;
+    cerrarModalBtn.onclick = () => modalEl.style.display = "none";
+    cerrarModalX.onclick   = () => modalEl.style.display = "none";
+    window.onclick = (e) => { if (e.target === modalEl) modalEl.style.display = "none"; };
+ 
+    function limpiarFormulario() {
+      ["nombre","cedula","telefono","correo","direccion","monto","fecha"].forEach(id => {
+        document.getElementById(id).value = "";
+      });
+      document.getElementById("estado").value = "Activo";
     }
-    if (typeof security.rememberSession === "boolean") {
-      document.getElementById("remember-session").checked = security.rememberSession;
+ 
+    function actualizarContadores(clientes) {
+      document.getElementById("contadorClientes").textContent  = clientes.length;
+      document.getElementById("contadorActivos").textContent   = clientes.filter(c => c.estado === "Activo").length;
+      document.getElementById("contadorInactivos").textContent = clientes.filter(c => c.estado === "Inactivo").length;
     }
-    if (typeof security.autoLock === "boolean") {
-      document.getElementById("auto-lock").checked = security.autoLock;
-    }
-
-    if (typeof notifications.pagosVencidos === "boolean") {
-      document.getElementById("noti-pagos-vencidos").checked = notifications.pagosVencidos;
-    }
-    if (typeof notifications.prestamosAprobados === "boolean") {
-      document.getElementById("noti-prestamos-aprobados").checked = notifications.prestamosAprobados;
-    }
-    if (typeof notifications.resumenes === "boolean") {
-      document.getElementById("noti-resumenes").checked = notifications.resumenes;
-    }
-    if (typeof notifications.seguridad === "boolean") {
-      document.getElementById("noti-seguridad").checked = notifications.seguridad;
-    }
-  }
-
-  function applyTheme(theme) {
-    const root = document.documentElement;
-
-    root.classList.remove("theme-claro", "theme-oscuro", "theme-azul");
-    root.classList.add(`theme-${theme}`);
-    localStorage.setItem("appTheme", theme);
-
-    if (theme === "oscuro") {
-      root.style.background = "#0f172a";
-    } else if (theme === "azul") {
-      root.style.background = "#dbeafe";
-    } else {
-      root.style.background = "#f3f4f6";
-    }
-
-    updateThemeButtons(theme);
-  }
-
-  function updateThemeButtons(activeTheme) {
-    document.querySelectorAll(".theme-btn").forEach(btn => {
-      btn.classList.remove("active-theme");
-      if (btn.dataset.theme === activeTheme) {
-        btn.classList.add("active-theme");
+ 
+    async function cargarClientes() {
+      tabla.innerHTML = "";
+      try {
+        const resp = await fetch(`${API_URL}/clientes/`, {
+          headers: { "Authorization": "Bearer " + token }
+        });
+        if (resp.status === 401) {
+          showToast("Sesión expirada. Inicia sesión nuevamente.", "warning", 1800);
+          localStorage.removeItem("token");
+          setTimeout(() => { window.location.href = "index2.html"; }, 1200);
+          return;
+        }
+        const clientes = await resp.json();
+        actualizarContadores(clientes);
+        clientes.forEach(c => {
+          const fila = document.createElement("tr");
+          fila.innerHTML = `
+            <td>${c.nombre}</td>
+            <td>${c.cedula}</td>
+            <td>${c.telefono || "-"}</td>
+            <td>${c.correo || "-"}</td>
+            <td>${c.direccion || "-"}</td>
+            <td class="text-blue-600 font-bold">$${Number(c.monto).toLocaleString("es-CO")}</td>
+            <td>${c.fecha}</td>
+            <td><span class="badge ${c.estado === "Activo" ? "activo" : "inactivo"}">${c.estado}</span></td>
+            <td>
+              <span class="btn-editar"   onclick="editarCliente(${c.id})">Editar</span> |
+              <span class="btn-eliminar" onclick="eliminarCliente(${c.id})">Eliminar</span>
+            </td>
+          `;
+          tabla.appendChild(fila);
+        });
+      } catch (e) {
+        console.log(e);
+        showToast("Error conectando con el servidor", "error");
       }
-    });
-  }
-
-  function initTheme() {
-    const savedTheme = localStorage.getItem("appTheme") || "claro";
-    applyTheme(savedTheme);
-
-    document.querySelectorAll(".theme-btn").forEach(btn => {
-      btn.addEventListener("click", () => {
-        applyTheme(btn.dataset.theme);
+    }
+ 
+    guardarBtn.onclick = async () => {
+      const nombre    = document.getElementById("nombre").value.trim();
+      const cedula    = document.getElementById("cedula").value.trim();
+      const telefono  = document.getElementById("telefono").value.trim();
+      const correo    = document.getElementById("correo").value.trim();
+      const direccion = document.getElementById("direccion").value.trim();
+      const monto     = parseFloat(document.getElementById("monto").value.replace(/\./g,""));
+      const fecha     = document.getElementById("fecha").value;
+      const estado    = document.getElementById("estado").value;
+ 
+      if (!nombre || !cedula || isNaN(monto) || !fecha) {
+        showToast("Completa los campos obligatorios", "warning");
+        return;
+      }
+ 
+      const data = { nombre, cedula, telefono, correo, direccion, monto, fecha, estado };
+ 
+      try {
+        const esEdicion = Boolean(clienteEditando);
+        let resp;
+        if (esEdicion) {
+          resp = await fetch(`${API_URL}/clientes/${clienteEditando}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+            body: JSON.stringify(data)
+          });
+          if (!resp.ok) { showToast("Error actualizando cliente", "error"); return; }
+          clienteEditando = null;
+          guardarBtn.textContent  = "Guardar";
+          tituloModal.textContent = "Nuevo Cliente";
+        } else {
+          resp = await fetch(`${API_URL}/clientes/`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+            body: JSON.stringify(data)
+          });
+          if (!resp.ok) {
+            let msg = "Error guardando el cliente";
+            try { const err = await resp.json(); if (err?.detail) msg = err.detail; } catch {}
+            showToast(msg, "error");
+            return;
+          }
+        }
+        modalEl.style.display = "none";
+        limpiarFormulario();
+        showToast(esEdicion ? "Cliente actualizado correctamente" : "Cliente creado correctamente", "success");
+        cargarClientes();
+      } catch { showToast("Error conectando con el servidor", "error"); }
+    };
+ 
+    async function eliminarCliente(id) {
+      const ok = await showConfirm("¿Eliminar cliente?");
+      if (!ok) return;
+      try {
+        await fetch(`${API_URL}/clientes/${id}`, {
+          method: "DELETE",
+          headers: { "Authorization": "Bearer " + token }
+        });
+        showToast("Cliente eliminado", "success");
+        cargarClientes();
+      } catch { showToast("Error eliminando cliente", "error"); }
+    }
+ 
+    async function editarCliente(id) {
+      try {
+        const resp = await fetch(`${API_URL}/clientes/${id}`, {
+          headers: { "Authorization": "Bearer " + token }
+        });
+        if (!resp.ok) { showToast("Error cargando cliente", "error"); return; }
+        const c = await resp.json();
+        document.getElementById("nombre").value    = c.nombre    || "";
+        document.getElementById("cedula").value    = c.cedula    || "";
+        document.getElementById("telefono").value  = c.telefono  || "";
+        document.getElementById("correo").value    = c.correo    || "";
+        document.getElementById("direccion").value = c.direccion || "";
+        document.getElementById("monto").value     = c.monto     || "";
+        document.getElementById("fecha").value     = c.fecha     || "";
+        document.getElementById("estado").value    = c.estado    || "Activo";
+        clienteEditando = id;
+        guardarBtn.textContent  = "Actualizar Cliente";
+        tituloModal.textContent = "Editar Cliente";
+        modalEl.style.display = "flex";
+      } catch { showToast("Error conectando con el servidor", "error"); }
+    }
+ 
+    /* ══════════════════════════════════════
+       INIT
+    ══════════════════════════════════════ */
+    document.addEventListener("DOMContentLoaded", async () => {
+      aplicarTemaGuardado();
+      await cargarUsuario();
+      await cargarClientes();
+ 
+      flatpickr("#fecha", {
+        dateFormat: "Y-m-d",
+        minDate: "2020-01-01",
+        locale: {
+          firstDayOfWeek: 1,
+          weekdays: {
+            shorthand: ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"],
+            longhand:  ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"],
+          },
+          months: {
+            shorthand: ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"],
+            longhand:  ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"],
+          }
+        }
       });
     });
-  }
-
-  function logout() {
-    localStorage.removeItem("token");
-    window.location.href = "index2.html";
-  }
-
-  document.addEventListener("DOMContentLoaded", () => {
-    loadUser();
-    loadLocalSettings();
-    initTheme();
-    const savedPic = localStorage.getItem('profilePic');
-
-  });
-  document.addEventListener("DOMContentLoaded", () => {
-  const montoInput = document.getElementById("monto");
-  montoInput.addEventListener("input", function () {
-  // Quitar todo lo que no sea número
-  let raw = this.value.replace(/\D/g, "");
-  // Formatear con puntos cada 3 dígitos manualmente
-  if (raw) {
-    this.value = raw.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-  } else {
-    this.value = "";
-  }
-});
-});
-</script>
-
+ 
+    /* ── Auto-formato miles ── */
+    document.getElementById("monto").addEventListener("input", function () {
+      let raw = this.value.replace(/[^0-9]/g, "");
+      let formatted = "", count = 0;
+      for (let i = raw.length - 1; i >= 0; i--) {
+        if (count > 0 && count % 3 === 0) formatted = "." + formatted;
+        formatted = raw[i] + formatted;
+        count++;
+      }
+      this.value = formatted;
+    });
+  </script>
 </body>
 </html>

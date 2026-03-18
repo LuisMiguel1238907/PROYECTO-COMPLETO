@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es" style="background:#f3f4f6;">
+<html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,30 +7,41 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
   <title>Préstamos - Sistema de Préstamos</title>
 
+  <!-- 
+    ✅ ÚNICO script de tema — va AQUÍ en <head>, antes de cualquier CSS.
+    Así el navegador nunca llega a pintar el fondo incorrecto.
+    Se eliminaron los scripts duplicados que estaban en <body>.
+  -->
   <script>
     (() => {
       const tema = localStorage.getItem("appTheme") || "claro";
-      const root = document.documentElement;
+      document.documentElement.classList.add("theme-" + tema);
+      document.documentElement.style.background =
+        tema === "oscuro" ? "#0f172a" :
+        tema === "azul"   ? "#dbeafe" :
+        "#f3f4f6";
 
-      root.classList.remove("theme-claro", "theme-oscuro", "theme-azul");
-      root.classList.add(`theme-${tema}`);
-
-      if (tema === "oscuro") {
-        root.style.background = "#0f172a";
-      } else if (tema === "azul") {
-        root.style.background = "#dbeafe";
-      } else {
-        root.style.background = "#f3f4f6";
-      }
+      // ✅ Inyecta la imagen de perfil ANTES de que el navegador pinte nada
+      // Así nunca se ve el icono por defecto
+      document.addEventListener("DOMContentLoaded", () => {
+        const pic = localStorage.getItem("profilePic");
+        const img = document.querySelector("header img[alt='perfil']");
+        if (img) {
+          if (pic) {
+            img.src = pic;
+          }
+          img.style.opacity = "1";
+        }
+      });
     })();
   </script>
 
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
+    /* ── Reset base: el fondo lo controla el script de arriba, no CSS ── */
     html, body {
       margin: 0;
-      background: #f3f4f6;
     }
 
     .sidebar {
@@ -117,17 +128,9 @@
       display: inline-block;
     }
 
-    .activo {
-      background: #10b981;
-    }
-
-    .pagado {
-      background: #2563eb;
-    }
-
-    .atrasado {
-      background: #ef4444;
-    }
+    .activo   { background: #10b981; }
+    .pagado   { background: #2563eb; }
+    .atrasado { background: #ef4444; }
 
     .btn-eliminar {
       color: #dc2626;
@@ -180,381 +183,224 @@
       box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
     }
 
-   
-    /* =========================
-   TOASTS PERSONALIZADOS
-========================= */
-.toast-container {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 9999;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
+    /* ── TOASTS ── */
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
 
-.toast {
-  min-width: 280px;
-  max-width: 380px;
-  padding: 14px 16px;
-  border-radius: 16px;
-  color: white;
-  font-weight: 500;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  animation: slideInToast 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
+    .toast {
+      min-width: 280px;
+      max-width: 380px;
+      padding: 14px 16px;
+      border-radius: 16px;
+      color: white;
+      font-weight: 500;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      animation: slideInToast 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
 
-.toast-success {
-  background: linear-gradient(135deg, #10b981, #059669);
-}
+    .toast-success { background: linear-gradient(135deg, #10b981, #059669); }
+    .toast-error   { background: linear-gradient(135deg, #ef4444, #dc2626); }
+    .toast-warning { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .toast-info    { background: linear-gradient(135deg, #3b82f6, #2563eb); }
 
-.toast-error {
-  background: linear-gradient(135deg, #ef4444, #dc2626);
-}
+    .toast-icon    { font-size: 1.2rem; line-height: 1.2; }
+    .toast-content { flex: 1; font-size: 0.95rem; line-height: 1.35; }
+    .toast-close   { background: transparent; border: none; color: white; font-size: 1.1rem; cursor: pointer; opacity: 0.85; }
+    .toast-close:hover { opacity: 1; }
 
-.toast-warning {
-  background: linear-gradient(135deg, #f59e0b, #d97706);
-}
+    .toast-progress {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.45);
+      animation: toastProgress linear forwards;
+    }
 
-.toast-info {
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
-}
+    @keyframes slideInToast {
+      from { opacity: 0; transform: translateX(40px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
 
-.toast-icon {
-  font-size: 1.2rem;
-  line-height: 1.2;
-}
+    @keyframes toastProgress {
+      from { width: 100%; }
+      to   { width: 0%; }
+    }
 
-.toast-content {
-  flex: 1;
-  font-size: 0.95rem;
-  line-height: 1.35;
-}
+    /* ── CONFIRM MODAL ── */
+    .custom-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(17, 24, 39, 0.6);
+      backdrop-filter: blur(4px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9998;
+      padding: 1rem;
+    }
 
-.toast-close {
-  background: transparent;
-  border: none;
-  color: white;
-  font-size: 1.1rem;
-  cursor: pointer;
-  opacity: 0.85;
-}
+    .custom-modal-overlay.active { display: flex; }
 
-.toast-close:hover {
-  opacity: 1;
-}
+    .custom-modal-box {
+      width: 100%;
+      max-width: 420px;
+      background: white;
+      border-radius: 22px;
+      padding: 24px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.22);
+      text-align: center;
+      animation: modalPop 0.2s ease;
+    }
 
-.toast-progress {
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.45);
-  animation: toastProgress linear forwards;
-}
+    .custom-modal-icon  { font-size: 2.2rem; margin-bottom: 10px; }
+    .custom-modal-title { font-size: 1.3rem; font-weight: 700; color: #111827; margin-bottom: 8px; }
+    .custom-modal-text  { color: #4b5563; font-size: 0.98rem; line-height: 1.5; margin-bottom: 20px; }
+    .custom-modal-actions { display: flex; justify-content: center; gap: 12px; }
 
-@keyframes slideInToast {
-  from {
-    opacity: 0;
-    transform: translateX(40px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
+    .btn-modal    { border: none; padding: 12px 18px; border-radius: 12px; font-weight: 600; cursor: pointer; transition: 0.2s ease; }
+    .btn-cancelar { background: #e5e7eb; color: #111827; }
+    .btn-cancelar:hover { background: #d1d5db; }
+    .btn-aceptar  { background: #2563eb; color: white; }
+    .btn-aceptar:hover  { background: #1d4ed8; }
 
-@keyframes toastProgress {
-  from {
-    width: 100%;
-  }
-  to {
-    width: 0%;
-  }
-}
+    @keyframes modalPop {
+      from { opacity: 0; transform: scale(0.95) translateY(8px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
 
-/* =========================
-   CONFIRM PERSONALIZADO
-========================= */
-.custom-modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(17, 24, 39, 0.6);
-  backdrop-filter: blur(4px);
-  display: none;
-  justify-content: center;
-  align-items: center;
-  z-index: 9998;
-  padding: 1rem;
-}
+    /* ── TEMAS ── */
 
-.custom-modal-overlay.active {
-  display: flex;
-}
-
-.custom-modal-box {
-  width: 100%;
-  max-width: 420px;
-  background: white;
-  border-radius: 22px;
-  padding: 24px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.22);
-  text-align: center;
-  animation: modalPop 0.2s ease;
-}
-
-.custom-modal-icon {
-  font-size: 2.2rem;
-  margin-bottom: 10px;
-}
-
-.custom-modal-title {
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: #111827;
-  margin-bottom: 8px;
-}
-
-.custom-modal-text {
-  color: #4b5563;
-  font-size: 0.98rem;
-  line-height: 1.5;
-  margin-bottom: 20px;
-}
-
-.custom-modal-actions {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-}
-
-.btn-modal {
-  border: none;
-  padding: 12px 18px;
-  border-radius: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: 0.2s ease;
-}
-
-.btn-cancelar {
-  background: #e5e7eb;
-  color: #111827;
-}
-
-.btn-cancelar:hover {
-  background: #d1d5db;
-}
-
-.btn-aceptar {
-  background: #2563eb;
-  color: white;
-}
-
-.btn-aceptar:hover {
-  background: #1d4ed8;
-}
-
-@keyframes modalPop {
-  from {
-    opacity: 0;
-    transform: scale(0.95) translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-/* Soporte tema oscuro */
-html.theme-oscuro .custom-modal-box {
-  background: #111827 !important;
-}
-
-html.theme-oscuro .custom-modal-title {
-  color: #f9fafb !important;
-}
-
-html.theme-oscuro .custom-modal-text {
-  color: #d1d5db !important;
-}
-
-html.theme-oscuro .btn-cancelar {
-  background: #374151 !important;
-  color: #f9fafb !important;
-}
- /* =========================
-       TEMAS GLOBALES
-    ========================= */
-
-    /* TEMA CLARO */
-    body.theme-claro {
+    /* CLARO */
+    html.theme-claro,
+    html.theme-claro body {
       background: #f3f4f6;
     }
 
-    /* TEMA OSCURO */
-    body.theme-oscuro {
+    /* OSCURO */
+    html.theme-oscuro,
+    html.theme-oscuro body {
       background: #0f172a !important;
     }
 
-    body.theme-oscuro main h1,
-    body.theme-oscuro main h2,
-    body.theme-oscuro main h3,
-    body.theme-oscuro main p,
-    body.theme-oscuro main span,
-    body.theme-oscuro main strong,
-    body.theme-oscuro main label,
-    body.theme-oscuro main th,
-    body.theme-oscuro main td {
+    html.theme-oscuro body main h1,
+    html.theme-oscuro body main h2,
+    html.theme-oscuro body main h3,
+    html.theme-oscuro body main p,
+    html.theme-oscuro body main span,
+    html.theme-oscuro body main strong,
+    html.theme-oscuro body main label,
+    html.theme-oscuro body main th,
+    html.theme-oscuro body main td {
       color: #f9fafb !important;
     }
 
-    body.theme-oscuro .bg-white,
-    body.theme-oscuro .card,
-    body.theme-oscuro .modal-content {
+    html.theme-oscuro .bg-white,
+    html.theme-oscuro .card,
+    html.theme-oscuro .modal-content {
       background: #111827 !important;
       color: #f9fafb !important;
     }
 
-    body.theme-oscuro th {
+    html.theme-oscuro th {
       background: #1f2937 !important;
       border-bottom: 2px solid #374151 !important;
     }
 
-    body.theme-oscuro td {
+    html.theme-oscuro td {
       border-bottom: 1px solid #1f2937 !important;
     }
 
-    body.theme-oscuro tr:hover {
+    html.theme-oscuro tr:hover {
       background: #1f2937 !important;
     }
 
-    body.theme-oscuro .modal-content input,
-    body.theme-oscuro .modal-content select {
+    html.theme-oscuro .modal-content input,
+    html.theme-oscuro .modal-content select {
       background: #1f2937 !important;
       color: #f9fafb !important;
       border-color: #374151 !important;
     }
 
-    body.theme-oscuro .modal-content input::placeholder {
+    html.theme-oscuro .modal-content input::placeholder {
       color: #9ca3af !important;
     }
 
-    body.theme-oscuro .sidebar {
+    html.theme-oscuro .sidebar {
       background: linear-gradient(180deg, #020617 0%, #111827 100%) !important;
     }
 
-    /* TEMA AZUL */
-    body.theme-azul {
+    html.theme-oscuro .custom-modal-box  { background: #111827 !important; }
+    html.theme-oscuro .custom-modal-title { color: #f9fafb !important; }
+    html.theme-oscuro .custom-modal-text  { color: #d1d5db !important; }
+    html.theme-oscuro .btn-cancelar       { background: #374151 !important; color: #f9fafb !important; }
+
+    /* AZUL */
+    html.theme-azul,
+    html.theme-azul body {
       background: #dbeafe !important;
     }
 
-    body.theme-azul .bg-white,
-    body.theme-azul .card,
-    body.theme-azul .modal-content {
+    html.theme-azul .bg-white,
+    html.theme-azul .card,
+    html.theme-azul .modal-content {
       background: #eff6ff !important;
     }
 
-    body.theme-azul .sidebar {
+    html.theme-azul .sidebar {
       background: linear-gradient(180deg, #1d4ed8 0%, #1e3a8a 100%) !important;
     }
-  .flatpickr-calendar {
-  background-color: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-  color: #111827;
-  opacity: 0;
-  transform: translateY(10px);
-  transition: opacity 0.25s ease, transform 0.25s ease;
-  padding: 8px;
-}
-.flatpickr-calendar.open {
-  opacity: 1;
-  transform: translateY(0);
-}
-.flatpickr-month {
-  background-color: #ffffff !important;
-  color: #111827 !important;
-}
-.flatpickr-current-month .cur-month {
-  color: #111827 !important;
-  font-size: 15px !important;
-  font-weight: 500 !important;
-}
-.flatpickr-current-month input.cur-year {
-  color: #9ca3af !important;
-  font-size: 15px !important;
-  font-weight: 400 !important;
-}
-.flatpickr-weekdays { background-color: #ffffff !important; }
-span.flatpickr-weekday {
-  background-color: #ffffff !important;
-  color: #6b7280 !important;
-  font-size: 13px !important;
-  font-weight: 500 !important;
-}
-.flatpickr-prev-month svg path,
-.flatpickr-next-month svg path { fill: #6b7280; }
-.flatpickr-prev-month:hover,
-.flatpickr-next-month:hover { background: transparent !important; }
-.flatpickr-prev-month:hover svg path,
-.flatpickr-next-month:hover svg path { fill: #111827; }
-.flatpickr-day {
-  color: #111827;
-  border-radius: 50% !important;
-  border: none !important;
-}
-.flatpickr-day.prevMonthDay,
-.flatpickr-day.nextMonthDay { color: #d1d5db !important; }
-.flatpickr-day:hover {
-  background-color: #f3f4f6 !important;
-  color: #111827 !important;
-  border: none !important;
-}
-.flatpickr-day.selected,
-.flatpickr-day.selected:hover {
-  background-color: #10b981 !important;
-  border-color: #10b981 !important;
-  color: #ffffff !important;
-}
-.flatpickr-day.today { border: none !important; }
-.flatpickr-day.disabled,
-.flatpickr-day.disabled:hover {
-  color: #d1d5db !important;
-  background: transparent !important;
-}
+
+    /* ── Flatpickr ── */
+    .flatpickr-calendar {
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .flatpickr-calendar.open {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .flatpickr-month                            { background-color: #ffffff !important; color: #111827 !important; }
+    .flatpickr-current-month .cur-month         { color: #111827 !important; font-size: 15px !important; font-weight: 500 !important; }
+    .flatpickr-current-month input.cur-year     { color: #9ca3af !important; font-size: 15px !important; font-weight: 400 !important; }
+    .flatpickr-weekdays                         { background-color: #ffffff !important; }
+    span.flatpickr-weekday                      { background-color: #ffffff !important; color: #6b7280 !important; font-size: 13px !important; font-weight: 500 !important; }
+    .flatpickr-prev-month svg path,
+    .flatpickr-next-month svg path              { fill: #6b7280; }
+    .flatpickr-prev-month:hover,
+    .flatpickr-next-month:hover                 { background: transparent !important; }
+    .flatpickr-prev-month:hover svg path,
+    .flatpickr-next-month:hover svg path        { fill: #111827; }
+    .flatpickr-day                              { color: #111827; border-radius: 50% !important; border: none !important; }
+    .flatpickr-day.prevMonthDay,
+    .flatpickr-day.nextMonthDay                 { color: #d1d5db !important; }
+    .flatpickr-day:hover                        { background-color: #f3f4f6 !important; color: #111827 !important; border: none !important; }
+    .flatpickr-day.selected,
+    .flatpickr-day.selected:hover               { background-color: #10b981 !important; border-color: #10b981 !important; color: #ffffff !important; }
+    .flatpickr-day.today                        { border: none !important; }
+    .flatpickr-day.disabled,
+    .flatpickr-day.disabled:hover               { color: #d1d5db !important; background: transparent !important; }
   </style>
- </head>
+</head>
 
+<!-- ✅ Un solo <body>, sin style inline de background -->
 <body class="font-sans antialiased">
-  <body class="font-sans antialiased">
-  <script>
-    (() => {
-      const tema = localStorage.getItem("appTheme") || "claro";
-      const root = document.documentElement;
 
-      // aplica a HTML (por si tienes CSS que usa html.theme-...)
-      root.classList.remove("theme-claro", "theme-oscuro", "theme-azul");
-      root.classList.add(`theme-${tema}`);
-
-      // aplica a BODY (TU CSS usa body.theme-...)
-      document.body.classList.remove("theme-claro", "theme-oscuro", "theme-azul");
-      document.body.classList.add(`theme-${tema}`);
-
-      // color de fondo
-      root.style.background =
-        tema === "oscuro" ? "#0f172a" :
-        tema === "azul" ? "#dbeafe" :
-        "#f3f4f6";
-    })();
-  </script>
   <div class="flex">
     <!-- SIDEBAR -->
     <aside class="sidebar fixed h-screen text-white p-6 shadow-xl">
@@ -564,7 +410,6 @@ span.flatpickr-weekday {
 
       <nav>
         <ul class="space-y-2">
-          <!-- DESPUÉS (Opción A) -->
           <li><a href="index3.html#dashboard" class="nav-link">🏠 Dashboard</a></li>
           <li><a href="index3.html#clientes" class="nav-link">👥 Clientes</a></li>
           <li><a href="prestamos.html" class="nav-link active">💰 Préstamos</a></li>
@@ -595,6 +440,7 @@ span.flatpickr-weekday {
             src="https://cdn-icons-png.flaticon.com/512/1077/1077012.png"
             class="w-10 h-10 rounded-full border-2 border-blue-400 shadow"
             alt="perfil"
+            style="opacity:0; transition: opacity 0.2s ease;"
           >
         </div>
       </header>
@@ -694,363 +540,275 @@ span.flatpickr-weekday {
       </form>
     </div>
   </div>
-<div id="toastContainer" class="toast-container"></div>
 
-<div id="customConfirm" class="custom-modal-overlay">
-  <div class="custom-modal-box">
-    <div class="custom-modal-icon">⚠️</div>
-    <h3 class="custom-modal-title">Confirmación</h3>
-    <p id="customConfirmMessage" class="custom-modal-text">¿Estás seguro?</p>
+  <!-- TOASTS -->
+  <div id="toastContainer" class="toast-container"></div>
 
-    <div class="custom-modal-actions">
-      <button id="customConfirmCancel" class="btn-modal btn-cancelar">Cancelar</button>
-      <button id="customConfirmOk" class="btn-modal btn-aceptar">Aceptar</button>
+  <!-- CONFIRM -->
+  <div id="customConfirm" class="custom-modal-overlay">
+    <div class="custom-modal-box">
+      <div class="custom-modal-icon">⚠️</div>
+      <h3 class="custom-modal-title">Confirmación</h3>
+      <p id="customConfirmMessage" class="custom-modal-text">¿Estás seguro?</p>
+      <div class="custom-modal-actions">
+        <button id="customConfirmCancel" class="btn-modal btn-cancelar">Cancelar</button>
+        <button id="customConfirmOk" class="btn-modal btn-aceptar">Aceptar</button>
+      </div>
     </div>
   </div>
-</div>
-<script>
-  function showToast(message, type = "success", duration = 3000) {
-    const container = document.getElementById("toastContainer");
 
-    const icons = {
-      success: "✅",
-      error: "❌",
-      warning: "⚠️",
-      info: "ℹ️"
-    };
+  <script>
+    function showToast(message, type = "success", duration = 3000) {
+      const container = document.getElementById("toastContainer");
+      const icons = { success: "✅", error: "❌", warning: "⚠️", info: "ℹ️" };
+      const toast = document.createElement("div");
+      toast.className = `toast toast-${type}`;
+      toast.innerHTML = `
+        <div class="toast-icon">${icons[type] || "ℹ️"}</div>
+        <div class="toast-content">${message}</div>
+        <button class="toast-close">&times;</button>
+        <div class="toast-progress" style="animation-duration:${duration}ms;"></div>
+      `;
+      container.appendChild(toast);
+      const removeToast = () => {
+        toast.style.opacity = "0";
+        toast.style.transform = "translateX(30px)";
+        toast.style.transition = "all 0.2s ease";
+        setTimeout(() => toast.remove(), 200);
+      };
+      toast.querySelector(".toast-close").addEventListener("click", removeToast);
+      setTimeout(removeToast, duration);
+    }
 
-    const toast = document.createElement("div");
-    toast.className = `toast toast-${type}`;
-    toast.innerHTML = `
-      <div class="toast-icon">${icons[type] || "ℹ️"}</div>
-      <div class="toast-content">${message}</div>
-      <button class="toast-close">&times;</button>
-      <div class="toast-progress" style="animation-duration:${duration}ms;"></div>
-    `;
-
-    container.appendChild(toast);
-
-    const removeToast = () => {
-      toast.style.opacity = "0";
-      toast.style.transform = "translateX(30px)";
-      toast.style.transition = "all 0.2s ease";
-      setTimeout(() => toast.remove(), 200);
-    };
-
-    toast.querySelector(".toast-close").addEventListener("click", removeToast);
-    setTimeout(removeToast, duration);
-  }
-
-  function showConfirm(message) {
-    return new Promise((resolve) => {
-      const modal = document.getElementById("customConfirm");
-      const text = document.getElementById("customConfirmMessage");
-      const btnOk = document.getElementById("customConfirmOk");
-      const btnCancel = document.getElementById("customConfirmCancel");
-
-      text.textContent = message;
-      modal.classList.add("active");
-
-      function cleanup(result) {
-        modal.classList.remove("active");
-        btnOk.removeEventListener("click", okHandler);
-        btnCancel.removeEventListener("click", cancelHandler);
-        modal.removeEventListener("click", outsideHandler);
-        resolve(result);
-      }
-
-      function okHandler() {
-        cleanup(true);
-      }
-
-      function cancelHandler() {
-        cleanup(false);
-      }
-
-      function outsideHandler(e) {
-        if (e.target === modal) {
-          cleanup(false);
+    function showConfirm(message) {
+      return new Promise((resolve) => {
+        const modal   = document.getElementById("customConfirm");
+        const text    = document.getElementById("customConfirmMessage");
+        const btnOk   = document.getElementById("customConfirmOk");
+        const btnCancel = document.getElementById("customConfirmCancel");
+        text.textContent = message;
+        modal.classList.add("active");
+        function cleanup(result) {
+          modal.classList.remove("active");
+          btnOk.removeEventListener("click", okHandler);
+          btnCancel.removeEventListener("click", cancelHandler);
+          modal.removeEventListener("click", outsideHandler);
+          resolve(result);
         }
-      }
-
-      btnOk.addEventListener("click", okHandler);
-      btnCancel.addEventListener("click", cancelHandler);
-      modal.addEventListener("click", outsideHandler);
-    });
-  }
-
-  const API = "http://127.0.0.1:8000";
-  const token = localStorage.getItem("token");
-
-  if (!token) {
-    showToast("Sesión expirada. Inicia sesión nuevamente.", "warning", 1800);
-    setTimeout(() => {
-      window.location.href = "index2.html";
-    }, 1200);
-  }
-
-  function aplicarTemaGuardado() {
-  const tema = localStorage.getItem("appTheme") || "claro";
-  const root = document.documentElement;
-
-  // HTML
-  root.classList.remove("theme-claro", "theme-oscuro", "theme-azul");
-  root.classList.add(`theme-${tema}`);
-
-  // BODY (clave para que tu CSS funcione)
-  document.body.classList.remove("theme-claro", "theme-oscuro", "theme-azul");
-  document.body.classList.add(`theme-${tema}`);
-
-  // Fondo
-  root.style.background =
-    tema === "oscuro" ? "#0f172a" :
-    tema === "azul" ? "#dbeafe" :
-    "#f3f4f6";
-}
-
-  async function cargarUsuario() {
-    try {
-      const resp = await fetch(`${API}/auth/me`, {
-        headers: { "Authorization": "Bearer " + token }
+        function okHandler()      { cleanup(true);  }
+        function cancelHandler()  { cleanup(false); }
+        function outsideHandler(e){ if (e.target === modal) cleanup(false); }
+        btnOk.addEventListener("click", okHandler);
+        btnCancel.addEventListener("click", cancelHandler);
+        modal.addEventListener("click", outsideHandler);
       });
+    }
 
-      if (resp.ok) {
-        const user = await resp.json();
-        document.getElementById("usuarioNombre").textContent = user.nombre;
-      } else {
+    const API   = "http://127.0.0.1:8000";
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      showToast("Sesión expirada. Inicia sesión nuevamente.", "warning", 1800);
+      setTimeout(() => { window.location.href = "index2.html"; }, 1200);
+    }
+
+    /* ── aplica tema al body (el <html> ya lo tiene desde el script del <head>) ── */
+    function aplicarTemaGuardado() {
+      const tema = localStorage.getItem("appTheme") || "claro";
+      document.body.classList.remove("theme-claro", "theme-oscuro", "theme-azul");
+      document.body.classList.add("theme-" + tema);
+    }
+
+    async function cargarUsuario() {
+      try {
+        const resp = await fetch(`${API}/auth/me`, {
+          headers: { "Authorization": "Bearer " + token }
+        });
+        document.getElementById("usuarioNombre").textContent =
+          resp.ok ? (await resp.json()).nombre : "Usuario";
+      } catch (e) {
         document.getElementById("usuarioNombre").textContent = "Usuario";
       }
-    } catch (e) {
-      console.log("Error cargando usuario", e);
-      document.getElementById("usuarioNombre").textContent = "Usuario";
     }
-  }
 
-  function logout() {
-    localStorage.removeItem("token");
-    window.location.href = "index2.html";
-  }
-
-  function toggleModal(show) {
-    document.getElementById("modal").style.display = show ? "flex" : "none";
-  }
-
-  async function cargarClientes() {
-    try {
-      const res = await fetch(`${API}/clientes`, {
-        headers: { "Authorization": "Bearer " + token }
-      });
-
-      const data = await res.json();
-      const select = document.getElementById("clienteSelect");
-
-      select.innerHTML = '<option value="">Seleccione</option>';
-
-      data.forEach(c => {
-        const op = document.createElement("option");
-        op.value = c.id;
-        op.textContent = c.nombre;
-        select.appendChild(op);
-      });
-    } catch (e) {
-      console.log("Error cargando clientes", e);
+    function logout() {
+      localStorage.removeItem("token");
+      window.location.href = "index2.html";
     }
-  }
 
-  function obtenerClaseEstado(estado) {
-    if (estado === "Activo") return "activo";
-    if (estado === "Pagado") return "pagado";
-    if (estado === "Atrasado") return "atrasado";
-    return "activo";
-  }
-
-  async function cargarPrestamos() {
-    try {
-      const res = await fetch(`${API}/prestamos`, {
-        headers: { "Authorization": "Bearer " + token }
-      });
-
-      const prestamos = await res.json();
-      const tbody = document.getElementById("tablaPrestamos");
-
-      tbody.innerHTML = "";
-      let totalPrestado = 0;
-      let activos = 0;
-      let pagados = 0;
-      let atrasados = 0;
-
-      prestamos.forEach(p => {
-        const montoTotal = (p.monto_inicial || 0) + (p.total_interes || 0);
-        totalPrestado += montoTotal;
-
-        if (p.estado === "Activo") activos++;
-        if (p.estado === "Pagado") pagados++;
-        if (p.estado === "Atrasado") atrasados++;
-
-        const fila = document.createElement("tr");
-        fila.innerHTML = `
-          <td>${p.cliente ? p.cliente.nombre : "Sin cliente"}</td>
-          <td class="text-blue-600 font-bold">$${montoTotal.toLocaleString()}</td>
-          <td>${p.fecha_inicio}</td>
-          <td>${p.fecha_limite}</td>
-          <td>
-            <span class="badge ${obtenerClaseEstado(p.estado)}">${p.estado}</span>
-          </td>
-          <td>
-            <span onclick="eliminarPrestamo(${p.id})" class="btn-eliminar">Eliminar</span>
-          </td>
-        `;
-        tbody.appendChild(fila);
-      });
-
-      document.getElementById("totalPrestado").textContent = "$" + totalPrestado.toLocaleString();
-      document.getElementById("prestamosActivos").textContent = activos;
-      document.getElementById("prestamosPagados").textContent = pagados;
-      document.getElementById("prestamosVencidos").textContent = atrasados;
-
-    } catch (e) {
-      console.log("Error cargando préstamos", e);
-      showToast("Error cargando préstamos", "error");
+    function toggleModal(show) {
+      document.getElementById("modal").style.display = show ? "flex" : "none";
     }
-  }
 
-  document.getElementById("formPrestamo").addEventListener("submit", async e => {
-    e.preventDefault();
+    async function cargarClientes() {
+      try {
+        const res  = await fetch(`${API}/clientes`, { headers: { "Authorization": "Bearer " + token } });
+        const data = await res.json();
+        const select = document.getElementById("clienteSelect");
+        select.innerHTML = '<option value="">Seleccione</option>';
+        data.forEach(c => {
+          const op = document.createElement("option");
+          op.value = c.id;
+          op.textContent = c.nombre;
+          select.appendChild(op);
+        });
+      } catch (e) { console.log("Error cargando clientes", e); }
+    }
 
-    const clienteSelect = document.getElementById("clienteSelect");
-    const montoInput = document.getElementById("monto");
-    const interesInput = document.getElementById("interes");
-    const inicioInput = document.getElementById("inicio");
-    const limiteInput = document.getElementById("limite");
+    function obtenerClaseEstado(estado) {
+      if (estado === "Activo")   return "activo";
+      if (estado === "Pagado")   return "pagado";
+      if (estado === "Atrasado") return "atrasado";
+      return "activo";
+    }
 
-    // ✅ DESPUÉS — reemplázala por estas dos
-const montoRaw = document.getElementById("monto").value.replace(/\./g, "");
-const monto = parseFloat(montoRaw);
-    const interes = parseFloat(interesInput.value);
+    async function cargarPrestamos() {
+      try {
+        const res      = await fetch(`${API}/prestamos`, { headers: { "Authorization": "Bearer " + token } });
+        const prestamos = await res.json();
+        const tbody    = document.getElementById("tablaPrestamos");
+        tbody.innerHTML = "";
+        let totalPrestado = 0, activos = 0, pagados = 0, atrasados = 0;
 
-    const total_interes = monto * (interes / 100);
+        prestamos.forEach(p => {
+          const montoTotal = (p.monto_inicial || 0) + (p.total_interes || 0);
+          totalPrestado += montoTotal;
+          if (p.estado === "Activo")   activos++;
+          if (p.estado === "Pagado")   pagados++;
+          if (p.estado === "Atrasado") atrasados++;
 
-    const nuevo = {
-      cliente_id: parseInt(clienteSelect.value),
-      monto_inicial: monto,
-      total_interes: total_interes,
-      fecha_inicio: inicioInput.value,
-      fecha_limite: limiteInput.value
-    };
-    
+          const fila = document.createElement("tr");
+          fila.innerHTML = `
+            <td>${p.cliente ? p.cliente.nombre : "Sin cliente"}</td>
+            <td class="text-blue-600 font-bold">$${montoTotal.toLocaleString()}</td>
+            <td>${p.fecha_inicio}</td>
+            <td>${p.fecha_limite}</td>
+            <td><span class="badge ${obtenerClaseEstado(p.estado)}">${p.estado}</span></td>
+            <td><span onclick="eliminarPrestamo(${p.id})" class="btn-eliminar">Eliminar</span></td>
+          `;
+          tbody.appendChild(fila);
+        });
 
-    try {
-      const res = await fetch(`${API}/prestamos`, {
-        method: "POST",
-        headers: {
-          "Authorization": "Bearer " + token,
-          "Content-Type": "application/json"
+        document.getElementById("totalPrestado").textContent    = "$" + totalPrestado.toLocaleString();
+        document.getElementById("prestamosActivos").textContent = activos;
+        document.getElementById("prestamosPagados").textContent = pagados;
+        document.getElementById("prestamosVencidos").textContent = atrasados;
+      } catch (e) {
+        console.log("Error cargando préstamos", e);
+        showToast("Error cargando préstamos", "error");
+      }
+    }
+
+    document.getElementById("formPrestamo").addEventListener("submit", async e => {
+      e.preventDefault();
+      const clienteSelect = document.getElementById("clienteSelect");
+      const interesInput  = document.getElementById("interes");
+      const inicioInput   = document.getElementById("inicio");
+      const limiteInput   = document.getElementById("limite");
+
+      const montoRaw = document.getElementById("monto").value.replace(/\./g, "");
+      const monto    = parseFloat(montoRaw);
+      const interes  = parseFloat(interesInput.value);
+      const total_interes = monto * (interes / 100);
+
+      const nuevo = {
+        cliente_id:   parseInt(clienteSelect.value),
+        monto_inicial: monto,
+        total_interes: total_interes,
+        fecha_inicio:  inicioInput.value,
+        fecha_limite:  limiteInput.value
+      };
+
+      try {
+        const res = await fetch(`${API}/prestamos`, {
+          method: "POST",
+          headers: { "Authorization": "Bearer " + token, "Content-Type": "application/json" },
+          body: JSON.stringify(nuevo)
+        });
+        if (res.ok) {
+          showToast("Préstamo creado correctamente", "success");
+          document.getElementById("formPrestamo").reset();
+          toggleModal(false);
+          cargarPrestamos();
+        } else {
+          showToast("Error creando préstamo", "error");
+        }
+      } catch (e) { showToast("Error conectando con el servidor", "error"); }
+    });
+
+    async function eliminarPrestamo(id) {
+      const confirmado = await showConfirm("¿Eliminar préstamo?");
+      if (!confirmado) return;
+      try {
+        const res = await fetch(`${API}/prestamos/${id}`, {
+          method: "DELETE",
+          headers: { "Authorization": "Bearer " + token }
+        });
+        if (res.ok) { showToast("Préstamo eliminado", "success"); cargarPrestamos(); }
+        else          showToast("Error al eliminar", "error");
+      } catch (e) { showToast("Error conectando con el servidor", "error"); }
+    }
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      aplicarTemaGuardado();
+      await cargarUsuario();
+      await cargarClientes();
+      await cargarPrestamos();
+      // La imagen de perfil ya se aplica en el script del <head> via DOMContentLoaded
+    });
+
+    /* ── Flatpickr ── */
+    flatpickr("#inicio", {
+      dateFormat: "Y-m-d",
+      minDate: "2020-01-01",
+      locale: {
+        firstDayOfWeek: 1,
+        weekdays: {
+          shorthand: ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"],
+          longhand:  ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"],
         },
-        body: JSON.stringify(nuevo)
-      });
-
-      if (res.ok) {
-        showToast("Préstamo creado correctamente", "success");
-        document.getElementById("formPrestamo").reset();
-        toggleModal(false);
-        cargarPrestamos();
-      } else {
-        showToast("Error creando préstamo", "error");
+        months: {
+          shorthand: ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"],
+          longhand:  ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"],
+        }
+      },
+      onChange: function(selectedDates) {
+        if (selectedDates[0]) {
+          const minBase    = new Date("2026-01-01");
+          const fechaInicio = selectedDates[0];
+          pickerLimite.set("minDate", fechaInicio > minBase ? fechaInicio : minBase);
+        }
       }
-    } catch (e) {
-      showToast("Error conectando con el servidor", "error");
-    }
-  });
+    });
 
-  async function eliminarPrestamo(id) {
-    const confirmado = await showConfirm("¿Eliminar préstamo?");
-    if (!confirmado) return;
-
-    try {
-      const res = await fetch(`${API}/prestamos/${id}`, {
-        method: "DELETE",
-        headers: { "Authorization": "Bearer " + token }
-      });
-
-      if (res.ok) {
-        showToast("Préstamo eliminado", "success");
-        cargarPrestamos();
-      } else {
-        showToast("Error al eliminar", "error");
+    const pickerLimite = flatpickr("#limite", {
+      dateFormat: "Y-m-d",
+      minDate: "2026-01-01",
+      locale: {
+        firstDayOfWeek: 1,
+        weekdays: {
+          shorthand: ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"],
+          longhand:  ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"],
+        },
+        months: {
+          shorthand: ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"],
+          longhand:  ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"],
+        }
       }
-    } catch (e) {
-      showToast("Error conectando con el servidor", "error");
-    }
-  }
+    });
 
-  document.addEventListener("DOMContentLoaded", async () => {
-    aplicarTemaGuardado();
-    await cargarUsuario();
-    await cargarClientes();
-    await cargarPrestamos();
-    const savedPic = localStorage.getItem('profilePic');
-if (savedPic) {
-  const headerPic = document.querySelector('header img[alt="perfil"]');
-  if (headerPic) headerPic.src = savedPic;
-}
-  });
-// Fecha inicio
-flatpickr("#inicio", {
-  dateFormat: "Y-m-d",
-  minDate: "2020-01-01",
-  locale: {
-    firstDayOfWeek: 1,
-    weekdays: {
-      shorthand: ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"],
-      longhand: ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"],
-    },
-    months: {
-      shorthand: ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"],
-      longhand: ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"],
-    }
-  },
-  onChange: function(selectedDates) {
-    if (selectedDates[0]) {
-      const minBase = new Date("2026-01-01");
-      const fechaInicio = selectedDates[0];
-      pickerLimite.set("minDate", fechaInicio > minBase ? fechaInicio : minBase);
-    }
-  }
-});
-
-// Fecha límite — guardada en variable para poder controlarla
-const pickerLimite = flatpickr("#limite", {
-  dateFormat: "Y-m-d",
-  minDate: "2026-01-01",   // ← enero 2026 fijo
-  locale: {
-    firstDayOfWeek: 1,
-    weekdays: {
-      shorthand: ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"],
-      longhand: ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"],
-    },
-    months: {
-      shorthand: ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"],
-      longhand: ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"],
-    }
-  }
-  // sin onChange aquí
-});
-// Auto-formato puntos de miles
-const montoInputPagos = document.getElementById("monto");
-montoInputPagos.addEventListener("input", function () {
-  let raw = this.value.replace(/[^0-9]/g, "");
-  let formatted = "";
-  let count = 0;
-  for (let i = raw.length - 1; i >= 0; i--) {
-    if (count > 0 && count % 3 === 0) {
-      formatted = "." + formatted;
-    }
-    formatted = raw[i] + formatted;
-    count++;
-  }
-  this.value = formatted;
-});
-</script>
-
+    /* ── Auto-formato miles ── */
+    document.getElementById("monto").addEventListener("input", function () {
+      let raw       = this.value.replace(/[^0-9]/g, "");
+      let formatted = "";
+      let count     = 0;
+      for (let i = raw.length - 1; i >= 0; i--) {
+        if (count > 0 && count % 3 === 0) formatted = "." + formatted;
+        formatted = raw[i] + formatted;
+        count++;
+      }
+      this.value = formatted;
+    });
+  </script>
 </body>
 </html>
