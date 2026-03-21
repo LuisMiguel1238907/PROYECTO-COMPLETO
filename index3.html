@@ -244,10 +244,11 @@
             <p id="total_ganancias" class="text-3xl font-bold text-green-600">$0</p>
             <p class="text-gray-500 text-sm mt-1">Acumuladas</p>
           </div>
-          <div class="bg-white p-6 rounded-2xl shadow card border-l-4 border-red-500">
+          <div class="bg-white p-6 rounded-2xl shadow card border-l-4 border-red-500"
+            onclick="abrirModalAtrasados()" style="cursor:pointer;" title="Ver préstamos atrasados">
             <h2 class="text-gray-600 text-sm font-semibold uppercase mb-2">Préstamos Atrasados</h2>
             <p id="prestamos_atrasados" class="text-3xl font-bold text-red-600">0</p>
-            <p class="text-yellow-600 text-sm mt-1">A revisar</p>
+            <p class="text-yellow-600 text-sm mt-1">⚠️ Click para ver</p>
           </div>
         </div>
  
@@ -294,7 +295,7 @@
         </div>
  
         <div class="bg-white p-6 rounded-2xl shadow card">
-          <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
+          <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-4">
             <div>
               <h2 class="text-xl font-semibold text-gray-700">👥 Listado de Clientes</h2>
               <p class="text-gray-500 text-sm mt-1">Consulta, edita y elimina registros fácilmente</p>
@@ -304,12 +305,28 @@
               ➕ Nuevo Cliente
             </button>
           </div>
+
+          <!-- Buscador por cédula -->
+          <div style="display:flex;align-items:center;gap:10px;margin:0 0 16px 0;">
+            <input type="text" id="buscarCedula" placeholder="🔍  Buscar por cédula..."
+              style="width:260px;padding:9px 14px;border:1.5px solid #d1d5db;border-radius:10px;
+                     font-size:14px;color:#111827;background:#fff;outline:none;font-family:inherit;"
+              onfocus="this.style.borderColor='#3b82f6'"
+              onblur="this.style.borderColor='#d1d5db'">
+            <button id="limpiarBusqueda"
+              style="display:none;padding:8px 14px;background:#fee2e2;color:#dc2626;border:none;
+                     border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">
+              ✕ Limpiar
+            </button>
+            <span id="resultadoBusqueda" style="font-size:13px;color:#6b7280;font-weight:500;"></span>
+          </div>
+
           <div class="table-wrap">
             <table>
               <thead>
                 <tr>
                   <th>Nombre</th><th>Cédula</th><th>Teléfono</th><th>Correo</th>
-                  <th>Dirección</th><th>Monto</th><th>Fecha</th><th>Estado</th><th>Acciones</th>
+                  <th>Dirección</th><th>Fecha</th><th>Estado</th><th>Acciones</th>
                 </tr>
               </thead>
               <tbody id="tablaClientes"></tbody>
@@ -336,7 +353,6 @@
       <input type="text"  id="telefono"  placeholder="Teléfono">
       <input type="email" id="correo"    placeholder="Correo electrónico">
       <input type="text"  id="direccion" placeholder="Dirección">
-      <input type="text"  id="monto"     placeholder="Monto del préstamo" required inputmode="numeric">
       <input type="text"  id="fecha"     placeholder="Selecciona una fecha" required>
       <select id="estado">
         <option value="Activo">Activo</option>
@@ -355,6 +371,35 @@
     </div>
   </div>
  
+
+  <!-- MODAL PRÉSTAMOS ATRASADOS -->
+  <div id="modalAtrasados" class="modal">
+    <div class="modal-content" style="max-width:700px;">
+      <div class="flex justify-between items-center mb-5">
+        <h2 class="text-xl font-bold text-red-600">⚠️ Préstamos Atrasados</h2>
+        <button onclick="document.getElementById('modalAtrasados').style.display='none'"
+          class="text-gray-400 hover:text-red-500 text-2xl leading-none">&times;</button>
+      </div>
+      <p style="color:#6b7280;font-size:14px;margin-bottom:16px;">Clientes con préstamos que superaron la fecha límite de pago.</p>
+      <div style="overflow-x:auto;">
+        <table style="min-width:100%;border-collapse:collapse;">
+          <thead>
+            <tr>
+              <th style="background:#f9fafb;color:#374151;font-size:0.75rem;text-transform:uppercase;font-weight:600;padding:12px 8px;border-bottom:2px solid #e5e7eb;text-align:left;">Cliente</th>
+              <th style="background:#f9fafb;color:#374151;font-size:0.75rem;text-transform:uppercase;font-weight:600;padding:12px 8px;border-bottom:2px solid #e5e7eb;text-align:left;">Monto Total</th>
+              <th style="background:#f9fafb;color:#374151;font-size:0.75rem;text-transform:uppercase;font-weight:600;padding:12px 8px;border-bottom:2px solid #e5e7eb;text-align:left;">Fecha Inicio</th>
+              <th style="background:#f9fafb;color:#374151;font-size:0.75rem;text-transform:uppercase;font-weight:600;padding:12px 8px;border-bottom:2px solid #e5e7eb;text-align:left;">Fecha Límite</th>
+              <th style="background:#f9fafb;color:#374151;font-size:0.75rem;text-transform:uppercase;font-weight:600;padding:12px 8px;border-bottom:2px solid #e5e7eb;text-align:left;">Días de atraso</th>
+            </tr>
+          </thead>
+          <tbody id="tablaAtrasados">
+            <tr><td colspan="5" style="text-align:center;color:#9ca3af;padding:2rem;">Cargando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
   <!-- TOAST -->
   <div id="toastContainer" class="toast-container"></div>
  
@@ -537,7 +582,7 @@
     window.onclick = (e) => { if (e.target === modalEl) modalEl.style.display = "none"; };
  
     function limpiarFormulario() {
-      ["nombre","cedula","telefono","correo","direccion","monto","fecha"].forEach(id => {
+      ["nombre","cedula","telefono","correo","direccion","fecha"].forEach(id => {
         document.getElementById(id).value = "";
       });
       document.getElementById("estado").value = "Activo";
@@ -562,25 +607,10 @@
           return;
         }
         const clientes = await resp.json();
+        todosLosClientes = clientes;
         actualizarContadores(clientes);
-        clientes.forEach(c => {
-          const fila = document.createElement("tr");
-          fila.innerHTML = `
-            <td>${c.nombre}</td>
-            <td>${c.cedula}</td>
-            <td>${c.telefono || "-"}</td>
-            <td>${c.correo || "-"}</td>
-            <td>${c.direccion || "-"}</td>
-            <td class="text-blue-600 font-bold">$${Number(c.monto).toLocaleString("es-CO")}</td>
-            <td>${c.fecha}</td>
-            <td><span class="badge ${c.estado === "Activo" ? "activo" : "inactivo"}">${c.estado}</span></td>
-            <td>
-              <span class="btn-editar"   onclick="editarCliente(${c.id})">Editar</span> |
-              <span class="btn-eliminar" onclick="eliminarCliente(${c.id})">Eliminar</span>
-            </td>
-          `;
-          tabla.appendChild(fila);
-        });
+        const q = document.getElementById("buscarCedula") ? document.getElementById("buscarCedula").value.trim().toLowerCase() : "";
+        renderizarClientes(q ? clientes.filter(c => c.cedula.toLowerCase().includes(q)) : clientes);
       } catch (e) {
         console.log(e);
         showToast("Error conectando con el servidor", "error");
@@ -593,16 +623,15 @@
       const telefono  = document.getElementById("telefono").value.trim();
       const correo    = document.getElementById("correo").value.trim();
       const direccion = document.getElementById("direccion").value.trim();
-      const monto     = parseFloat(document.getElementById("monto").value.replace(/\./g,""));
       const fecha     = document.getElementById("fecha").value;
       const estado    = document.getElementById("estado").value;
  
-      if (!nombre || !cedula || isNaN(monto) || !fecha) {
+      if (!nombre || !cedula || !fecha) {
         showToast("Completa los campos obligatorios", "warning");
         return;
       }
  
-      const data = { nombre, cedula, telefono, correo, direccion, monto, fecha, estado };
+      const data = { nombre, cedula, telefono, correo, direccion, fecha, estado };
  
       try {
         const esEdicion = Boolean(clienteEditando);
@@ -662,7 +691,6 @@
         document.getElementById("telefono").value  = c.telefono  || "";
         document.getElementById("correo").value    = c.correo    || "";
         document.getElementById("direccion").value = c.direccion || "";
-        document.getElementById("monto").value     = c.monto     || "";
         document.getElementById("fecha").value     = c.fecha     || "";
         document.getElementById("estado").value    = c.estado    || "Activo";
         clienteEditando = id;
@@ -672,6 +700,60 @@
       } catch { showToast("Error conectando con el servidor", "error"); }
     }
  
+    /* ══════════════════════════════════════
+       BÚSQUEDA POR CÉDULA
+    ══════════════════════════════════════ */
+    let todosLosClientes = [];
+    let buscadorIniciado = false;
+
+    function renderizarClientes(lista) {
+      tabla.innerHTML = "";
+      if (lista.length === 0) {
+        tabla.innerHTML = `<tr><td colspan="8" style="text-align:center;color:#9ca3af;padding:2rem;">No se encontraron clientes</td></tr>`;
+        return;
+      }
+      lista.forEach(c => {
+        const fila = document.createElement("tr");
+        fila.innerHTML = `
+          <td>${c.nombre}</td>
+          <td>${c.cedula}</td>
+          <td>${c.telefono || "-"}</td>
+          <td>${c.correo || "-"}</td>
+          <td>${c.direccion || "-"}</td>
+          <td>${c.fecha}</td>
+          <td><span class="badge ${c.estado === "Activo" ? "activo" : "inactivo"}">${c.estado}</span></td>
+          <td>
+            <span class="btn-editar" onclick="editarCliente(${c.id})">Editar</span> |
+            <span class="btn-eliminar" onclick="eliminarCliente(${c.id})">Eliminar</span>
+          </td>
+        `;
+        tabla.appendChild(fila);
+      });
+    }
+
+    function iniciarBuscador() {
+      if (buscadorIniciado) return;
+      buscadorIniciado = true;
+      const input      = document.getElementById("buscarCedula");
+      const btnLimpiar = document.getElementById("limpiarBusqueda");
+      const resultado  = document.getElementById("resultadoBusqueda");
+      if (!input) return;
+      input.addEventListener("input", function () {
+        const q = this.value.trim().toLowerCase();
+        btnLimpiar.style.display = q ? "block" : "none";
+        if (!q) { renderizarClientes(todosLosClientes); resultado.textContent = ""; return; }
+        const filtrados = todosLosClientes.filter(c => c.cedula.toLowerCase().includes(q));
+        renderizarClientes(filtrados);
+        resultado.textContent = filtrados.length === 0 ? "Sin resultados" : filtrados.length + " resultado" + (filtrados.length !== 1 ? "s" : "");
+      });
+      btnLimpiar.addEventListener("click", function () {
+        input.value = "";
+        this.style.display = "none";
+        resultado.textContent = "";
+        renderizarClientes(todosLosClientes);
+      });
+    }
+
     /* ══════════════════════════════════════
        NAVEGACIÓN ENTRE VISTAS
     ══════════════════════════════════════ */
@@ -692,6 +774,7 @@
         mainSubtitle.textContent = "Administra los clientes registrados en el sistema 👥";
         activarNav("clientes");
         await cargarClientes();
+        iniciarBuscador();
         location.hash = "clientes";
       } else {
         document.getElementById("view-dashboard").classList.add("active");
@@ -743,17 +826,60 @@
       });
     });
  
-    /* ── Auto-formato miles ── */
-    document.getElementById("monto").addEventListener("input", function () {
-      let raw = this.value.replace(/[^0-9]/g, "");
-      let formatted = "", count = 0;
-      for (let i = raw.length - 1; i >= 0; i--) {
-        if (count > 0 && count % 3 === 0) formatted = "." + formatted;
-        formatted = raw[i] + formatted;
-        count++;
+ 
+
+    /* ══════════════════════════════════════
+       MODAL PRÉSTAMOS ATRASADOS
+    ══════════════════════════════════════ */
+    async function abrirModalAtrasados() {
+      const modal = document.getElementById("modalAtrasados");
+      const tbody = document.getElementById("tablaAtrasados");
+      modal.style.display = "flex";
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#9ca3af;padding:2rem;">Cargando...</td></tr>';
+
+      try {
+        const resp = await fetch(`${API_URL}/prestamos`, {
+          headers: { "Authorization": "Bearer " + token }
+        });
+        if (!resp.ok) { showToast("Error cargando préstamos", "error"); return; }
+        const prestamos = await resp.json();
+        const atrasados = prestamos.filter(p => p.estado === "Atrasado");
+
+        if (atrasados.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#10b981;font-weight:600;padding:2rem;">✅ No hay préstamos atrasados</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = "";
+        const hoy = new Date();
+        hoy.setHours(0,0,0,0);
+        atrasados.forEach(p => {
+          const montoTotal  = (p.monto_inicial || 0) + (p.total_interes || 0);
+          const fechaLimite = new Date(p.fecha_limite + "T00:00:00");
+          const diasAtraso  = Math.floor((hoy - fechaLimite) / (1000 * 60 * 60 * 24));
+          const fila = document.createElement("tr");
+          fila.innerHTML = `
+            <td style="padding:10px 8px;border-bottom:1px solid #f3f4f6;font-weight:600;">${p.cliente ? p.cliente.nombre : "Sin cliente"}</td>
+            <td style="padding:10px 8px;border-bottom:1px solid #f3f4f6;color:#2563eb;font-weight:700;">$${montoTotal.toLocaleString("es-CO")}</td>
+            <td style="padding:10px 8px;border-bottom:1px solid #f3f4f6;">${p.fecha_inicio}</td>
+            <td style="padding:10px 8px;border-bottom:1px solid #f3f4f6;color:#ef4444;font-weight:600;">${p.fecha_limite}</td>
+            <td style="padding:10px 8px;border-bottom:1px solid #f3f4f6;">
+              <span style="background:#ef4444;color:white;padding:4px 10px;border-radius:999px;font-size:0.75rem;font-weight:600;">
+                ${diasAtraso > 0 ? diasAtraso + " días" : "Vence hoy"}
+              </span>
+            </td>
+          `;
+          tbody.appendChild(fila);
+        });
+      } catch (e) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#ef4444;padding:2rem;">Error conectando con el servidor</td></tr>';
       }
-      this.value = formatted;
+    }
+
+    document.getElementById("modalAtrasados").addEventListener("click", function(e) {
+      if (e.target === this) this.style.display = "none";
     });
+
   </script>
 </body>
 </html>

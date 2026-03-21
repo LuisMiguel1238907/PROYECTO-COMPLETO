@@ -6,7 +6,7 @@
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
   <title>Préstamos - Sistema de Préstamos</title>
-
+ 
   <!-- 
     ✅ ÚNICO script de tema — va AQUÍ en <head>, antes de cualquier CSS.
     Así el navegador nunca llega a pintar el fondo incorrecto.
@@ -20,7 +20,7 @@
         tema === "oscuro" ? "#0f172a" :
         tema === "azul"   ? "#dbeafe" :
         "#f3f4f6";
-
+ 
       // ✅ Inyecta la imagen de perfil ANTES de que el navegador pinte nada
       // Así nunca se ve el icono por defecto
       document.addEventListener("DOMContentLoaded", () => {
@@ -35,25 +35,25 @@
       });
     })();
   </script>
-
+ 
   <script src="https://cdn.tailwindcss.com"></script>
-
+ 
   <style>
     /* ── Reset base: el fondo lo controla el script de arriba, no CSS ── */
     html, body {
       margin: 0;
     }
-
+ 
     .sidebar {
       width: 16rem;
       background: linear-gradient(180deg, #111827 0%, #1f2937 100%);
       transition: all 0.3s ease;
     }
-
+ 
     .sidebar:hover {
       box-shadow: 0 0 25px rgba(59, 130, 246, 0.28);
     }
-
+ 
     .nav-link {
       display: block;
       padding: 0.75rem 1rem;
@@ -63,39 +63,39 @@
       font-weight: 500;
       text-decoration: none;
     }
-
+ 
     .nav-link:hover {
       background: #374151;
       color: white;
     }
-
+ 
     .nav-link.active {
       background: #2563eb;
       color: white;
       font-weight: 600;
       box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
     }
-
+ 
     .card {
       transition: all 0.3s ease;
     }
-
+ 
     .card:hover {
       transform: translateY(-4px);
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
     }
-
+ 
     .table-wrap {
       overflow-x: auto;
     }
-
+ 
     table {
       width: 100%;
       min-width: 900px;
       border-collapse: collapse;
       margin-top: 1rem;
     }
-
+ 
     th {
       background: #f9fafb;
       color: #374151;
@@ -106,7 +106,7 @@
       border-bottom: 2px solid #e5e7eb;
       text-align: left;
     }
-
+ 
     td {
       padding: 10px 8px;
       border-bottom: 1px solid #f3f4f6;
@@ -114,11 +114,11 @@
       font-size: 0.9rem;
       vertical-align: middle;
     }
-
+ 
     tr:hover {
       background: #f9fafb;
     }
-
+ 
     .badge {
       padding: 4px 10px;
       border-radius: 999px;
@@ -127,21 +127,21 @@
       font-weight: 600;
       display: inline-block;
     }
-
+ 
     .activo   { background: #10b981; }
     .pagado   { background: #2563eb; }
     .atrasado { background: #ef4444; }
-
+ 
     .btn-eliminar {
       color: #dc2626;
       cursor: pointer;
       font-weight: 600;
     }
-
+ 
     .btn-eliminar:hover {
       text-decoration: underline;
     }
-
+ 
     .modal {
       display: none;
       position: fixed;
@@ -152,7 +152,7 @@
       align-items: center;
       padding: 1rem;
     }
-
+ 
     .modal-content {
       background: white;
       width: 100%;
@@ -164,7 +164,7 @@
       overflow-y: auto;
       position: relative;
     }
-
+ 
     .modal-content input,
     .modal-content select {
       width: 100%;
@@ -176,13 +176,13 @@
       transition: 0.2s;
       background: white;
     }
-
+ 
     .modal-content input:focus,
     .modal-content select:focus {
       border-color: #3b82f6;
       box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
     }
-
+ 
     /* ── TOASTS ── */
     .toast-container {
       position: fixed;
@@ -193,7 +193,7 @@
       flex-direction: column;
       gap: 12px;
     }
-
+ 
     .toast {
       min-width: 280px;
       max-width: 380px;
@@ -209,17 +209,17 @@
       position: relative;
       overflow: hidden;
     }
-
+ 
     .toast-success { background: linear-gradient(135deg, #10b981, #059669); }
     .toast-error   { background: linear-gradient(135deg, #ef4444, #dc2626); }
     .toast-warning { background: linear-gradient(135deg, #f59e0b, #d97706); }
     .toast-info    { background: linear-gradient(135deg, #3b82f6, #2563eb); }
-
+ 
     .toast-icon    { font-size: 1.2rem; line-height: 1.2; }
     .toast-content { flex: 1; font-size: 0.95rem; line-height: 1.35; }
     .toast-close   { background: transparent; border: none; color: white; font-size: 1.1rem; cursor: pointer; opacity: 0.85; }
     .toast-close:hover { opacity: 1; }
-
+ 
     .toast-progress {
       position: absolute;
       left: 0;
@@ -228,17 +228,17 @@
       background: rgba(255, 255, 255, 0.45);
       animation: toastProgress linear forwards;
     }
-
+ 
     @keyframes slideInToast {
       from { opacity: 0; transform: translateX(40px); }
       to   { opacity: 1; transform: translateX(0); }
     }
-
+ 
     @keyframes toastProgress {
       from { width: 100%; }
       to   { width: 0%; }
     }
-
+ 
     /* ── CONFIRM MODAL ── */
     .custom-modal-overlay {
       position: fixed;
@@ -251,9 +251,9 @@
       z-index: 9998;
       padding: 1rem;
     }
-
+ 
     .custom-modal-overlay.active { display: flex; }
-
+ 
     .custom-modal-box {
       width: 100%;
       max-width: 420px;
@@ -264,37 +264,37 @@
       text-align: center;
       animation: modalPop 0.2s ease;
     }
-
+ 
     .custom-modal-icon  { font-size: 2.2rem; margin-bottom: 10px; }
     .custom-modal-title { font-size: 1.3rem; font-weight: 700; color: #111827; margin-bottom: 8px; }
     .custom-modal-text  { color: #4b5563; font-size: 0.98rem; line-height: 1.5; margin-bottom: 20px; }
     .custom-modal-actions { display: flex; justify-content: center; gap: 12px; }
-
+ 
     .btn-modal    { border: none; padding: 12px 18px; border-radius: 12px; font-weight: 600; cursor: pointer; transition: 0.2s ease; }
     .btn-cancelar { background: #e5e7eb; color: #111827; }
     .btn-cancelar:hover { background: #d1d5db; }
     .btn-aceptar  { background: #2563eb; color: white; }
     .btn-aceptar:hover  { background: #1d4ed8; }
-
+ 
     @keyframes modalPop {
       from { opacity: 0; transform: scale(0.95) translateY(8px); }
       to   { opacity: 1; transform: scale(1) translateY(0); }
     }
-
+ 
     /* ── TEMAS ── */
-
+ 
     /* CLARO */
     html.theme-claro,
     html.theme-claro body {
       background: #f3f4f6;
     }
-
+ 
     /* OSCURO */
     html.theme-oscuro,
     html.theme-oscuro body {
       background: #0f172a !important;
     }
-
+ 
     html.theme-oscuro body main h1,
     html.theme-oscuro body main h2,
     html.theme-oscuro body main h3,
@@ -306,75 +306,75 @@
     html.theme-oscuro body main td {
       color: #f9fafb !important;
     }
-
+ 
     html.theme-oscuro .bg-white,
     html.theme-oscuro .card,
     html.theme-oscuro .modal-content {
       background: #111827 !important;
       color: #f9fafb !important;
     }
-
+ 
     html.theme-oscuro th {
       background: #1f2937 !important;
       border-bottom: 2px solid #374151 !important;
     }
-
+ 
     html.theme-oscuro td {
       border-bottom: 1px solid #1f2937 !important;
     }
-
+ 
     html.theme-oscuro tr:hover {
       background: #1f2937 !important;
     }
-
+ 
     html.theme-oscuro .modal-content input,
     html.theme-oscuro .modal-content select {
       background: #1f2937 !important;
       color: #f9fafb !important;
       border-color: #374151 !important;
     }
-
+ 
     html.theme-oscuro .modal-content input::placeholder {
       color: #9ca3af !important;
     }
-
+ 
     html.theme-oscuro .sidebar {
       background: linear-gradient(180deg, #020617 0%, #111827 100%) !important;
     }
-
+ 
     html.theme-oscuro .custom-modal-box  { background: #111827 !important; }
     html.theme-oscuro .custom-modal-title { color: #f9fafb !important; }
     html.theme-oscuro .custom-modal-text  { color: #d1d5db !important; }
     html.theme-oscuro .btn-cancelar       { background: #374151 !important; color: #f9fafb !important; }
-
+ 
     /* AZUL */
     html.theme-azul,
     html.theme-azul body {
       background: #dbeafe !important;
     }
-
+ 
     html.theme-azul .bg-white,
     html.theme-azul .card,
     html.theme-azul .modal-content {
       background: #eff6ff !important;
     }
-
+ 
     html.theme-azul .sidebar {
       background: linear-gradient(180deg, #1d4ed8 0%, #1e3a8a 100%) !important;
     }
-
+ 
     /* ── Flatpickr ── */
     .flatpickr-calendar {
       opacity: 0;
       transform: translateY(10px);
       transition: opacity 0.3s ease, transform 0.3s ease;
     }
-
+ 
     .flatpickr-calendar.open {
       opacity: 1;
       transform: translateY(0);
     }
-
+ 
     .flatpickr-month                            { background-color: #ffffff !important; color: #111827 !important; }
     .flatpickr-current-month .cur-month         { color: #111827 !important; font-size: 15px !important; font-weight: 500 !important; }
     .flatpickr-current-month input.cur-year     { color: #9ca3af !important; font-size: 15px !important; font-weight: 400 !important; }
@@ -397,17 +397,17 @@
     .flatpickr-day.disabled:hover               { color: #d1d5db !important; background: transparent !important; }
   </style>
 </head>
-
+ 
 <!-- ✅ Un solo <body>, sin style inline de background -->
 <body class="font-sans antialiased">
-
+ 
   <div class="flex">
     <!-- SIDEBAR -->
     <aside class="sidebar fixed h-screen text-white p-6 shadow-xl">
       <h1 class="text-2xl font-bold mb-10 border-b border-gray-700 pb-3 text-center text-blue-400">
         💼 Mi Sistema
       </h1>
-
+ 
       <nav>
         <ul class="space-y-2">
           <li><a href="index3.html#dashboard" class="nav-link">🏠 Dashboard</a></li>
@@ -418,14 +418,14 @@
           <li><a href="configuracion.html" class="nav-link">⚙️ Configuración</a></li>
         </ul>
       </nav>
-
+ 
       <div class="mt-8">
         <button onclick="logout()" class="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-3 rounded-xl transition">
           Cerrar sesión
         </button>
       </div>
     </aside>
-
+ 
     <!-- MAIN -->
     <main class="ml-64 flex-1 min-h-screen p-8">
       <header class="flex justify-between items-center mb-10">
@@ -433,7 +433,7 @@
           <h1 class="text-4xl font-bold text-gray-800 mb-2">Gestión de Préstamos</h1>
           <p class="text-gray-600 text-lg">Administra los préstamos registrados en el sistema 💰</p>
         </div>
-
+ 
         <div class="flex items-center gap-4">
           <span id="usuarioNombre" class="text-gray-700 font-medium">Cargando...</span>
           <img
@@ -444,7 +444,7 @@
           >
         </div>
       </header>
-
+ 
       <!-- TARJETAS -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div class="bg-white p-6 rounded-2xl shadow card border-l-4 border-blue-500">
@@ -452,26 +452,26 @@
           <p id="totalPrestado" class="text-3xl font-bold text-blue-600">$0</p>
           <p class="text-gray-500 text-sm mt-1">Capital + interés</p>
         </div>
-
+ 
         <div class="bg-white p-6 rounded-2xl shadow card border-l-4 border-green-500">
           <h2 class="text-gray-600 text-sm font-semibold uppercase mb-2">Préstamos Activos</h2>
           <p id="prestamosActivos" class="text-3xl font-bold text-green-600">0</p>
           <p class="text-gray-500 text-sm mt-1">En curso</p>
         </div>
-
+ 
         <div class="bg-white p-6 rounded-2xl shadow card border-l-4 border-blue-500">
           <h2 class="text-gray-600 text-sm font-semibold uppercase mb-2">Préstamos Pagados</h2>
           <p id="prestamosPagados" class="text-3xl font-bold text-blue-600">0</p>
           <p class="text-gray-500 text-sm mt-1">Finalizados</p>
         </div>
-
+ 
         <div class="bg-white p-6 rounded-2xl shadow card border-l-4 border-red-500">
           <h2 class="text-gray-600 text-sm font-semibold uppercase mb-2">Préstamos Atrasados</h2>
           <p id="prestamosVencidos" class="text-3xl font-bold text-red-600">0</p>
           <p class="text-gray-500 text-sm mt-1">A revisar</p>
         </div>
       </div>
-
+ 
       <!-- TABLA -->
       <div class="bg-white p-6 rounded-2xl shadow card">
         <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
@@ -479,7 +479,7 @@
             <h2 class="text-xl font-semibold text-gray-700">💰 Préstamos Registrados</h2>
             <p class="text-gray-500 text-sm mt-1">Consulta y administra los préstamos creados</p>
           </div>
-
+ 
           <button
             class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-semibold shadow transition"
             onclick="toggleModal(true)"
@@ -487,7 +487,7 @@
             ➕ Nuevo Préstamo
           </button>
         </div>
-
+ 
         <div class="table-wrap">
           <table>
             <thead>
@@ -504,46 +504,76 @@
           </table>
         </div>
       </div>
-
+ 
       <footer class="text-center text-gray-500 text-sm mt-10 mb-4">
         © 2025 Sistema de Préstamos — Desarrollado por el grupo 💻
       </footer>
     </main>
   </div>
-
+ 
   <!-- MODAL -->
   <div id="modal" class="modal">
     <div class="modal-content">
       <button class="absolute top-3 right-4 text-gray-500 hover:text-red-500 text-2xl" onclick="toggleModal(false)">×</button>
-
+ 
       <h2 class="text-xl font-bold mb-5 text-gray-800">Nuevo Préstamo</h2>
-
+ 
       <form id="formPrestamo">
         <label class="block text-sm font-medium text-gray-700 mb-2">Cliente</label>
         <select id="clienteSelect" required></select>
-
+ 
         <label class="block text-sm font-medium text-gray-700 mb-2">Monto</label>
         <input type="text" id="monto" class="form-control" placeholder="Monto del préstamo" required inputmode="numeric">
-
+ 
         <label class="block text-sm font-medium text-gray-700 mb-2">Interés (%)</label>
-        <input type="number" id="interes" required>
-
+        <input type="number" id="interes" placeholder="Ej: 10" step="0.01" min="0" required>
+ 
+        <label class="block text-sm font-medium text-gray-700 mb-2">Frecuencia de pago</label>
+        <select id="frecuencia" required>
+          <option value="">Seleccione frecuencia</option>
+          <option value="diario">Diario</option>
+          <option value="semanal">Semanal</option>
+          <option value="mensual">Mensual</option>
+        </select>
+ 
+        <label class="block text-sm font-medium text-gray-700 mb-2">Número de cuotas</label>
+        <input type="number" id="cuotas" placeholder="Escriba la cantidad de cuotas" min="1" required>
+ 
+        <div id="resumenInteres" style="display:none; margin-bottom:0.9rem;"
+          class="bg-blue-50 border border-blue-200 rounded-xl p-3 text-sm text-blue-800">
+          <div class="flex justify-between mb-1">
+            <span>💰 Interés total:</span>
+            <span id="resumenInteresTotal" class="font-bold"></span>
+          </div>
+          <div class="flex justify-between mb-1">
+            <span>💵 Total a pagar:</span>
+            <span id="resumenTotalPagar" class="font-bold"></span>
+          </div>
+          <div class="flex justify-between">
+            <span>📅 Cuota por período:</span>
+            <span id="resumenCuota" class="font-bold"></span>
+          </div>
+        </div>
+ 
         <label class="block text-sm font-medium text-gray-700 mb-2">Fecha inicio</label>
         <input type="text" id="inicio" placeholder="aaaa-mm-dd" required>
-
-        <label class="block text-sm font-medium text-gray-700 mb-2">Fecha límite</label>
-        <input type="text" id="limite" placeholder="aaaa-mm-dd" required>
-
+ 
+        <label class="block text-sm font-medium text-gray-700 mb-2">
+          Fecha límite <span class="text-blue-500 font-normal"></span>
+        </label>
+        <input type="text" id="limite" placeholder="fecha final" readonly
+          style="background:#f3f4f6; cursor:not-allowed; color:#6b7280;">
+ 
         <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-xl w-full font-semibold transition">
           Guardar
         </button>
       </form>
     </div>
   </div>
-
+ 
   <!-- TOASTS -->
   <div id="toastContainer" class="toast-container"></div>
-
+ 
   <!-- CONFIRM -->
   <div id="customConfirm" class="custom-modal-overlay">
     <div class="custom-modal-box">
@@ -556,7 +586,7 @@
       </div>
     </div>
   </div>
-
+ 
   <script>
     function showToast(message, type = "success", duration = 3000) {
       const container = document.getElementById("toastContainer");
@@ -579,7 +609,7 @@
       toast.querySelector(".toast-close").addEventListener("click", removeToast);
       setTimeout(removeToast, duration);
     }
-
+ 
     function showConfirm(message) {
       return new Promise((resolve) => {
         const modal   = document.getElementById("customConfirm");
@@ -603,22 +633,22 @@
         modal.addEventListener("click", outsideHandler);
       });
     }
-
+ 
     const API   = "http://127.0.0.1:8000";
     const token = localStorage.getItem("token");
-
+ 
     if (!token) {
       showToast("Sesión expirada. Inicia sesión nuevamente.", "warning", 1800);
       setTimeout(() => { window.location.href = "index2.html"; }, 1200);
     }
-
+ 
     /* ── aplica tema al body (el <html> ya lo tiene desde el script del <head>) ── */
     function aplicarTemaGuardado() {
       const tema = localStorage.getItem("appTheme") || "claro";
       document.body.classList.remove("theme-claro", "theme-oscuro", "theme-azul");
       document.body.classList.add("theme-" + tema);
     }
-
+ 
     async function cargarUsuario() {
       try {
         const resp = await fetch(`${API}/auth/me`, {
@@ -630,16 +660,16 @@
         document.getElementById("usuarioNombre").textContent = "Usuario";
       }
     }
-
+ 
     function logout() {
       localStorage.removeItem("token");
       window.location.href = "index2.html";
     }
-
+ 
     function toggleModal(show) {
       document.getElementById("modal").style.display = show ? "flex" : "none";
     }
-
+ 
     async function cargarClientes() {
       try {
         const res  = await fetch(`${API}/clientes`, { headers: { "Authorization": "Bearer " + token } });
@@ -654,14 +684,14 @@
         });
       } catch (e) { console.log("Error cargando clientes", e); }
     }
-
+ 
     function obtenerClaseEstado(estado) {
       if (estado === "Activo")   return "activo";
       if (estado === "Pagado")   return "pagado";
       if (estado === "Atrasado") return "atrasado";
       return "activo";
     }
-
+ 
     async function cargarPrestamos() {
       try {
         const res      = await fetch(`${API}/prestamos`, { headers: { "Authorization": "Bearer " + token } });
@@ -669,14 +699,14 @@
         const tbody    = document.getElementById("tablaPrestamos");
         tbody.innerHTML = "";
         let totalPrestado = 0, activos = 0, pagados = 0, atrasados = 0;
-
+ 
         prestamos.forEach(p => {
           const montoTotal = (p.monto_inicial || 0) + (p.total_interes || 0);
           totalPrestado += montoTotal;
           if (p.estado === "Activo")   activos++;
           if (p.estado === "Pagado")   pagados++;
           if (p.estado === "Atrasado") atrasados++;
-
+ 
           const fila = document.createElement("tr");
           fila.innerHTML = `
             <td>${p.cliente ? p.cliente.nombre : "Sin cliente"}</td>
@@ -688,7 +718,7 @@
           `;
           tbody.appendChild(fila);
         });
-
+ 
         document.getElementById("totalPrestado").textContent    = "$" + totalPrestado.toLocaleString();
         document.getElementById("prestamosActivos").textContent = activos;
         document.getElementById("prestamosPagados").textContent = pagados;
@@ -698,27 +728,81 @@
         showToast("Error cargando préstamos", "error");
       }
     }
-
+ 
+    /* ── Calcula fecha límite y resumen en tiempo real ── */
+    function calcularResumen() {
+      const montoRaw  = document.getElementById("monto").value.replace(/\./g, "");
+      const monto     = parseFloat(montoRaw);
+      const interes   = parseFloat(document.getElementById("interes").value);
+      const frecuencia= document.getElementById("frecuencia").value;
+      const cuotas    = parseInt(document.getElementById("cuotas").value);
+      const inicio    = document.getElementById("inicio").value;
+ 
+      // Calcular y mostrar fecha límite
+      if (inicio && frecuencia && cuotas >= 1) {
+        const fechaInicio = new Date(inicio + "T00:00:00");
+        const fechaLimite = new Date(fechaInicio);
+        if (frecuencia === "diario")  fechaLimite.setDate(fechaLimite.getDate() + cuotas);
+        if (frecuencia === "semanal") fechaLimite.setDate(fechaLimite.getDate() + cuotas * 7);
+        if (frecuencia === "mensual") fechaLimite.setMonth(fechaLimite.getMonth() + cuotas);
+        const yyyy = fechaLimite.getFullYear();
+        const mm   = String(fechaLimite.getMonth() + 1).padStart(2, "0");
+        const dd   = String(fechaLimite.getDate()).padStart(2, "0");
+        document.getElementById("limite").value = `${yyyy}-${mm}-${dd}`;
+      } else {
+        document.getElementById("limite").value = "";
+      }
+ 
+      // Mostrar resumen de intereses
+      if (!isNaN(monto) && monto > 0 && !isNaN(interes) && interes >= 0 && cuotas >= 1) {
+        const totalInteres = monto * (interes / 100);
+        const totalPagar   = monto + totalInteres;
+        const cuotaValor   = totalPagar / cuotas;
+        const fmt = v => "$" + Math.round(v).toLocaleString("es-CO");
+        document.getElementById("resumenInteresTotal").textContent = fmt(totalInteres);
+        document.getElementById("resumenTotalPagar").textContent   = fmt(totalPagar);
+        document.getElementById("resumenCuota").textContent        = fmt(cuotaValor);
+        document.getElementById("resumenInteres").style.display    = "block";
+      } else {
+        document.getElementById("resumenInteres").style.display = "none";
+      }
+    }
+ 
+    ["monto","interes","frecuencia","cuotas","inicio"].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener("change", calcularResumen);
+        el.addEventListener("input",  calcularResumen);
+      }
+    });
+ 
     document.getElementById("formPrestamo").addEventListener("submit", async e => {
       e.preventDefault();
       const clienteSelect = document.getElementById("clienteSelect");
-      const interesInput  = document.getElementById("interes");
+      const frecuencia    = document.getElementById("frecuencia").value;
+      const cuotas        = parseInt(document.getElementById("cuotas").value);
       const inicioInput   = document.getElementById("inicio");
       const limiteInput   = document.getElementById("limite");
-
-      const montoRaw = document.getElementById("monto").value.replace(/\./g, "");
-      const monto    = parseFloat(montoRaw);
-      const interes  = parseFloat(interesInput.value);
+ 
+      if (!frecuencia) { showToast("Selecciona la frecuencia de pago", "warning"); return; }
+      if (!cuotas || cuotas < 1) { showToast("Ingresa el número de cuotas", "warning"); return; }
+      if (!limiteInput.value) { showToast("Completa la fecha de inicio para calcular la fecha límite", "warning"); return; }
+ 
+      const montoRaw      = document.getElementById("monto").value.replace(/\./g, "");
+      const monto         = parseFloat(montoRaw);
+      const interes       = parseFloat(document.getElementById("interes").value);
       const total_interes = monto * (interes / 100);
-
+ 
       const nuevo = {
-        cliente_id:   parseInt(clienteSelect.value),
+        cliente_id:    parseInt(clienteSelect.value),
         monto_inicial: monto,
         total_interes: total_interes,
+        frecuencia:    frecuencia,
+        cuotas:        cuotas,
         fecha_inicio:  inicioInput.value,
         fecha_limite:  limiteInput.value
       };
-
+ 
       try {
         const res = await fetch(`${API}/prestamos`, {
           method: "POST",
@@ -728,6 +812,7 @@
         if (res.ok) {
           showToast("Préstamo creado correctamente", "success");
           document.getElementById("formPrestamo").reset();
+          document.getElementById("resumenInteres").style.display = "none";
           toggleModal(false);
           cargarPrestamos();
         } else {
@@ -735,7 +820,7 @@
         }
       } catch (e) { showToast("Error conectando con el servidor", "error"); }
     });
-
+ 
     async function eliminarPrestamo(id) {
       const confirmado = await showConfirm("¿Eliminar préstamo?");
       if (!confirmado) return;
@@ -748,7 +833,7 @@
         else          showToast("Error al eliminar", "error");
       } catch (e) { showToast("Error conectando con el servidor", "error"); }
     }
-
+ 
     document.addEventListener("DOMContentLoaded", async () => {
       aplicarTemaGuardado();
       await cargarUsuario();
@@ -756,7 +841,7 @@
       await cargarPrestamos();
       // La imagen de perfil ya se aplica en el script del <head> via DOMContentLoaded
     });
-
+ 
     /* ── Flatpickr ── */
     flatpickr("#inicio", {
       dateFormat: "Y-m-d",
@@ -773,30 +858,12 @@
         }
       },
       onChange: function(selectedDates) {
-        if (selectedDates[0]) {
-          const minBase    = new Date("2026-01-01");
-          const fechaInicio = selectedDates[0];
-          pickerLimite.set("minDate", fechaInicio > minBase ? fechaInicio : minBase);
-        }
+        calcularResumen();
       }
     });
-
-    const pickerLimite = flatpickr("#limite", {
-      dateFormat: "Y-m-d",
-      minDate: "2026-01-01",
-      locale: {
-        firstDayOfWeek: 1,
-        weekdays: {
-          shorthand: ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"],
-          longhand:  ["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"],
-        },
-        months: {
-          shorthand: ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"],
-          longhand:  ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"],
-        }
-      }
-    });
-
+ 
+    /* fecha límite se calcula automáticamente — flatpickr no necesario */
+ 
     /* ── Auto-formato miles ── */
     document.getElementById("monto").addEventListener("input", function () {
       let raw       = this.value.replace(/[^0-9]/g, "");

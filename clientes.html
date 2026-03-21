@@ -90,13 +90,13 @@
       padding: 1.5rem; box-shadow: 0 20px 40px rgba(0,0,0,0.2);
       max-height: 90vh; overflow-y: auto; position: relative;
     }
-    .modal-content input,
-    .modal-content select {
+    #modalCliente input,
+    #modalCliente select {
       width: 100%; padding: 0.75rem 0.9rem; margin-bottom: 0.9rem;
       border: 1px solid #d1d5db; border-radius: 0.75rem; outline: none; transition: 0.2s; background: white;
     }
-    .modal-content input:focus,
-    .modal-content select:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
+    #modalCliente input:focus,
+    #modalCliente select:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.15); }
  
     /* ── Toasts ── */
     .toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 12px; }
@@ -158,9 +158,9 @@
     html.theme-oscuro th { background: #1f2937 !important; border-bottom: 2px solid #374151 !important; }
     html.theme-oscuro td { border-bottom: 1px solid #1f2937 !important; }
     html.theme-oscuro tr:hover { background: #1f2937 !important; }
-    html.theme-oscuro .modal-content input,
-    html.theme-oscuro .modal-content select { background: #1f2937 !important; color: #f9fafb !important; border-color: #374151 !important; }
-    html.theme-oscuro .modal-content input::placeholder { color: #9ca3af !important; }
+    html.theme-oscuro #modalCliente input,
+    html.theme-oscuro #modalCliente select { background: #1f2937 !important; color: #f9fafb !important; border-color: #374151 !important; }
+    html.theme-oscuro #modalCliente input::placeholder { color: #9ca3af !important; }
     html.theme-oscuro .sidebar { background: linear-gradient(180deg, #020617 0%, #111827 100%) !important; }
     html.theme-oscuro .custom-modal-box  { background: #111827 !important; }
     html.theme-oscuro .custom-modal-title { color: #f9fafb !important; }
@@ -244,7 +244,7 @@
  
       <!-- Tabla -->
       <div class="bg-white p-6 rounded-2xl shadow card">
-        <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
+        <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-4">
           <div>
             <h2 class="text-xl font-semibold text-gray-700">👥 Listado de Clientes</h2>
             <p class="text-gray-500 text-sm mt-1">Consulta, edita y elimina registros fácilmente</p>
@@ -254,12 +254,28 @@
             ➕ Nuevo Cliente
           </button>
         </div>
+
+        <!-- Buscador por cédula -->
+        <div style="display:flex;align-items:center;gap:10px;margin:0 0 16px 0;">
+          <input type="text" id="buscarCedula" placeholder="🔍  Buscar por cédula..."
+            style="width:260px;padding:9px 14px;border:1.5px solid #d1d5db;border-radius:10px;
+                   font-size:14px;color:#111827;background:#fff;outline:none;font-family:inherit;"
+            onfocus="this.style.borderColor='#3b82f6'"
+            onblur="this.style.borderColor='#d1d5db'">
+          <button id="limpiarBusqueda"
+            style="display:none;padding:8px 14px;background:#fee2e2;color:#dc2626;border:none;
+                   border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">
+            ✕ Limpiar
+          </button>
+          <span id="resultadoBusqueda" style="font-size:13px;color:#6b7280;font-weight:500;"></span>
+        </div>
+
         <div class="table-wrap">
           <table>
             <thead>
               <tr>
                 <th>Nombre</th><th>Cédula</th><th>Teléfono</th><th>Correo</th>
-                <th>Dirección</th><th>Monto</th><th>Fecha</th><th>Estado</th><th>Acciones</th>
+                <th>Dirección</th><th>Fecha</th><th>Estado</th><th>Acciones</th>
               </tr>
             </thead>
             <tbody id="tablaClientes"></tbody>
@@ -285,7 +301,6 @@
       <input type="text"  id="telefono"  placeholder="Teléfono">
       <input type="email" id="correo"    placeholder="Correo electrónico">
       <input type="text"  id="direccion" placeholder="Dirección">
-      <input type="text"  id="monto"     placeholder="Monto del préstamo" required inputmode="numeric">
       <input type="text"  id="fecha"     placeholder="Selecciona una fecha" required>
       <select id="estado">
         <option value="Activo">Activo</option>
@@ -431,7 +446,7 @@
     window.onclick = (e) => { if (e.target === modalEl) modalEl.style.display = "none"; };
  
     function limpiarFormulario() {
-      ["nombre","cedula","telefono","correo","direccion","monto","fecha"].forEach(id => {
+      ["nombre","cedula","telefono","correo","direccion","fecha"].forEach(id => {
         document.getElementById(id).value = "";
       });
       document.getElementById("estado").value = "Activo";
@@ -456,25 +471,10 @@
           return;
         }
         const clientes = await resp.json();
+        todosLosClientes = clientes;
         actualizarContadores(clientes);
-        clientes.forEach(c => {
-          const fila = document.createElement("tr");
-          fila.innerHTML = `
-            <td>${c.nombre}</td>
-            <td>${c.cedula}</td>
-            <td>${c.telefono || "-"}</td>
-            <td>${c.correo || "-"}</td>
-            <td>${c.direccion || "-"}</td>
-            <td class="text-blue-600 font-bold">$${Number(c.monto).toLocaleString("es-CO")}</td>
-            <td>${c.fecha}</td>
-            <td><span class="badge ${c.estado === "Activo" ? "activo" : "inactivo"}">${c.estado}</span></td>
-            <td>
-              <span class="btn-editar"   onclick="editarCliente(${c.id})">Editar</span> |
-              <span class="btn-eliminar" onclick="eliminarCliente(${c.id})">Eliminar</span>
-            </td>
-          `;
-          tabla.appendChild(fila);
-        });
+        const q = document.getElementById("buscarCedula").value.trim().toLowerCase();
+        renderizarClientes(q ? clientes.filter(c => c.cedula.toLowerCase().includes(q)) : clientes);
       } catch (e) {
         console.log(e);
         showToast("Error conectando con el servidor", "error");
@@ -487,16 +487,15 @@
       const telefono  = document.getElementById("telefono").value.trim();
       const correo    = document.getElementById("correo").value.trim();
       const direccion = document.getElementById("direccion").value.trim();
-      const monto     = parseFloat(document.getElementById("monto").value.replace(/\./g,""));
       const fecha     = document.getElementById("fecha").value;
       const estado    = document.getElementById("estado").value;
  
-      if (!nombre || !cedula || isNaN(monto) || !fecha) {
+      if (!nombre || !cedula || !fecha) {
         showToast("Completa los campos obligatorios", "warning");
         return;
       }
  
-      const data = { nombre, cedula, telefono, correo, direccion, monto, fecha, estado };
+      const data = { nombre, cedula, telefono, correo, direccion, fecha, estado };
  
       try {
         const esEdicion = Boolean(clienteEditando);
@@ -556,7 +555,6 @@
         document.getElementById("telefono").value  = c.telefono  || "";
         document.getElementById("correo").value    = c.correo    || "";
         document.getElementById("direccion").value = c.direccion || "";
-        document.getElementById("monto").value     = c.monto     || "";
         document.getElementById("fecha").value     = c.fecha     || "";
         document.getElementById("estado").value    = c.estado    || "Activo";
         clienteEditando = id;
@@ -567,12 +565,57 @@
     }
  
     /* ══════════════════════════════════════
+       BÚSQUEDA POR CÉDULA
+    ══════════════════════════════════════ */
+    let todosLosClientes = [];
+
+    function renderizarClientes(lista) {
+      tabla.innerHTML = "";
+      if (lista.length === 0) {
+        tabla.innerHTML = `<tr><td colspan="8" style="text-align:center;color:#9ca3af;padding:2rem;">No se encontraron clientes</td></tr>`;
+        return;
+      }
+      lista.forEach(c => {
+        const fila = document.createElement("tr");
+        fila.innerHTML = `
+          <td>${c.nombre}</td>
+          <td>${c.cedula}</td>
+          <td>${c.telefono || "-"}</td>
+          <td>${c.correo || "-"}</td>
+          <td>${c.direccion || "-"}</td>
+          <td>${c.fecha}</td>
+          <td><span class="badge ${c.estado === "Activo" ? "activo" : "inactivo"}">${c.estado}</span></td>
+          <td>
+            <span class="btn-editar"   onclick="editarCliente(${c.id})">Editar</span> |
+            <span class="btn-eliminar" onclick="eliminarCliente(${c.id})">Eliminar</span>
+          </td>
+        `;
+        tabla.appendChild(fila);
+      });
+    }
+
+    /* ══════════════════════════════════════
        INIT
     ══════════════════════════════════════ */
     document.addEventListener("DOMContentLoaded", async () => {
       aplicarTemaGuardado();
       await cargarUsuario();
       await cargarClientes();
+
+      document.getElementById("buscarCedula").addEventListener("input", function () {
+        const q = this.value.trim().toLowerCase();
+        document.getElementById("limpiarBusqueda").style.display = q ? "block" : "none";
+        if (!q) { renderizarClientes(todosLosClientes); document.getElementById("resultadoBusqueda").textContent = ""; return; }
+        const filtrados = todosLosClientes.filter(c => c.cedula.toLowerCase().includes(q));
+        renderizarClientes(filtrados);
+        document.getElementById("resultadoBusqueda").textContent = filtrados.length === 0 ? "Sin resultados" : filtrados.length + " resultado" + (filtrados.length !== 1 ? "s" : "");
+      });
+      document.getElementById("limpiarBusqueda").addEventListener("click", function () {
+        document.getElementById("buscarCedula").value = "";
+        this.style.display = "none";
+        document.getElementById("resultadoBusqueda").textContent = "";
+        renderizarClientes(todosLosClientes);
+      });
  
       flatpickr("#fecha", {
         dateFormat: "Y-m-d",
@@ -591,17 +634,6 @@
       });
     });
  
-    /* ── Auto-formato miles ── */
-    document.getElementById("monto").addEventListener("input", function () {
-      let raw = this.value.replace(/[^0-9]/g, "");
-      let formatted = "", count = 0;
-      for (let i = raw.length - 1; i >= 0; i--) {
-        if (count > 0 && count % 3 === 0) formatted = "." + formatted;
-        formatted = raw[i] + formatted;
-        count++;
-      }
-      this.value = formatted;
-    });
   </script>
 </body>
 </html>
